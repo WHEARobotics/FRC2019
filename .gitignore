@@ -102,3 +102,6 @@ ENV/
 
 # Pycharm projects
 .idea/
+
+# RobotPy deploy configurations
+.deploy_cfg
