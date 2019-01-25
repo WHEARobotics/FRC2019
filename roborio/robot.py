@@ -8,7 +8,7 @@ import ctre
 import wpilib.drive
 
 
-class MyRobot(wpilib.IterativeRobot):
+class MyRobot(wpilib.TimedRobot):
     
     def robotInit(self):
         """
@@ -107,7 +107,7 @@ class MyRobot(wpilib.IterativeRobot):
 ##        self.vel = 0
 ##        self.pos = 0
 ##        self.grav = 9.82      
-##        wpilib.CameraServer.launch()
+        wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.101:1181/
         
         
