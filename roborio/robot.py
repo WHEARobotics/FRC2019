@@ -56,8 +56,18 @@ class MyRobot(wpilib.TimedRobot):
 ##        self.l_motorFront.configSelectedFeedbackSensor(ctre.wpi_talonsrx.WPI_TalonSRX.FeedbackDevice.QuadEncoder, 0, 0)
 ##        self.r_motorFront.configSelectedFeedbackSensor(ctre.wpi_talonsrx.WPI_TalonSRX.FeedbackDevice.QuadEncoder, 0, 0)
 
+        self.elbow = ctre.wpi_talonsrx.WPI_TalonSRX(4)
+        self.elbow.setInverted(False)
+
+        self.wrist = ctre.wpi_talonsrx.WPI_TalonSRX(5)
+        self.wrist.setInverted(False)
+
+
         self.l_motorFront.setQuadraturePosition(0, 0)
         self.r_motorFront.setQuadraturePosition(0, 0)
+        
+        self.wrist.setQuadraturePosition(0, 0)
+        self.elbow.setQuadraturePosition(0, 0)
         
 
 
@@ -250,13 +260,13 @@ class MyRobot(wpilib.TimedRobot):
         #self.tankDrive = (self.xbox.getRawAxis(5) , self.xbox.getRawAxis(1))
 
         #Right Joystick Intake for Loader and Chute(Ground Pickup 100%)
-##        if self.r_joy.getRawButton(1):
-##            self.l_loader.set(1) 
+        if self.r_joy.getRawButton(1):
+            self.elbow.set(0.2) 
 ##            self.l_chute.set(1)
 ##            self.r_loader.set(1)
 ##            self.r_chute.set(1)
-##        else:
-##            self.l_loader.set(0) 
+        else:
+            self.elbow.set(0) 
 ##            self.l_chute.set(0)
 ##            self.r_loader.set(0)
 ##            self.r_chute.set(0)
@@ -265,6 +275,9 @@ class MyRobot(wpilib.TimedRobot):
 
         if self.counter % 50 == 0:
             msg = 'Posistion of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
+            self.logger.info(msg)
+
+            msg = 'Posistion of Left & Right Drive Motors{0} {1}'.format(self.wrist.getQuadraturePosition() , self.elbow.getQuadraturePosition())
             self.logger.info(msg)
 
             msg = 'Velocity of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
