@@ -9,7 +9,6 @@ import wpilib.drive
 
 
 class MyRobot(wpilib.TimedRobot):
-    
     def robotInit(self):
         """
         This function is called upon program startup and
@@ -35,31 +34,36 @@ class MyRobot(wpilib.TimedRobot):
         """
     
         #Here is the encoder setup for the 4 motor drivetrain
-        self.l_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(0)
-        self.l_motorFront.setInverted(False)
+       # self.l_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(0)
+       # self.l_motorFront.setInverted(False)
 
-        self.l_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(1)
-        self.l_motorBack.setInverted(False)
+        #self.l_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(1)
+        #self.l_motorBack.setInverted(False)
 
-        self.r_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(2)
-        self.r_motorFront.setInverted(False)
+        #self.r_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(2)
+        #self.r_motorFront.setInverted(False)
         
-        self.r_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(3)
-        self.r_motorBack.setInverted(False)
+        #self.r_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(3)
+        #self.r_motorBack.setInverted(False)
 
-        self.l_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
-        self.l_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
+        #self.l_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
+        #self.l_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
+#when you give the motor a positive value it turs clockwise when looking at the face of the gear box
+#and encoder counts negitive direction
+#there are 409600 counts per rev of the output shaft
+        #self.r_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
+        #self.r_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
 
-        self.r_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
-        self.r_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
+        self.wrist = ctre.wpi_talonsrx.WPI_TalonSRX(0)
+        self.wrist.setInverted(False)
 
 ##        self.l_motorFront.configSelectedFeedbackSensor(ctre.wpi_talonsrx.WPI_TalonSRX.FeedbackDevice.QuadEncoder, 0, 0)
 ##        self.r_motorFront.configSelectedFeedbackSensor(ctre.wpi_talonsrx.WPI_TalonSRX.FeedbackDevice.QuadEncoder, 0, 0)
 
-        self.l_motorFront.setQuadraturePosition(0, 0)
-        self.r_motorFront.setQuadraturePosition(0, 0)
+        #self.l_motorFront.setQuadraturePosition(0, 0)
+       # self.r_motorFront.setQuadraturePosition(0, 0)
         
-
+        self.wrist.setQuadraturePosition(0, 0)
 
         #Here is the encoder setup for the left and right chute motors
 ##        self.l_chute = ctre.wpi_talonsrx.WPI_TalonSRX(5)
@@ -87,13 +91,13 @@ class MyRobot(wpilib.TimedRobot):
 ##        self.r_loader.setInverted(False)
 
 
-        self.left = wpilib.SpeedControllerGroup(self.l_motorFront, self.l_motorBack)
-        self.right = wpilib.SpeedControllerGroup(self.r_motorFront, self.r_motorBack)
-        self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
+##        self.left = wpilib.SpeedControllerGroup(self.l_motorFront, self.l_motorBack)
+##        self.right = wpilib.SpeedControllerGroup(self.r_motorFront, self.r_motorBack)
+##        self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
         self.counter = 0
         self.auto_loop_counter = 0
 
-        
+        self.wrist_mode=1    #in stowed position
 ##        self.auto_switch0 = wpilib.DigitalInput(0)
 ##        self.auto_switch1 = wpilib.DigitalInput(1)
 ##        self.auto_switch2 = wpilib.DigitalInput(2)
@@ -107,7 +111,7 @@ class MyRobot(wpilib.TimedRobot):
 ##        self.vel = 0
 ##        self.pos = 0
 ##        self.grav = 9.82      
-        wpilib.CameraServer.launch()
+#        wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.101:1181/
         
         
@@ -142,8 +146,9 @@ class MyRobot(wpilib.TimedRobot):
 ##        self.start = default_timer()
          """
         pass
-    
+
     def autonomousPeriodic(self):
+        pass
         """This function is called periodically during autonomous."""
         """
         if(self.gameData[0] == 'L'):    	
@@ -154,10 +159,10 @@ class MyRobot(wpilib.TimedRobot):
             msg = 'Posistion of Auto Switch {0}'.format(self.getAutoSwitch())
         self.logger.info(msg)
         """
-        pass
+        
     
     """
-    def AutoPL(self):
+     def AutoPL(self):
         if self.getAutoSwitch() < 6:
 ##            time = default_timer() - self.start
             if self.auto_loop_counter <= 100:
@@ -224,52 +229,89 @@ class MyRobot(wpilib.TimedRobot):
                 self.drive.curvatureDrive(0.0,0,False)                
         self.auto_loop_counter +=1
       """
-
+          
 
     
     def teleopInit(self):
         
-        self.l_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
-        self.l_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
-
-        self.r_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
-        self.r_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
+        
+##        self.l_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
+##        self.l_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
+##
+##        self.r_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
+##        self.r_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
 
 ##        self.l_chute.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
 ##        self.r_chute.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
 
-        self.l_motorFront.setQuadraturePosition(0, 0)
-        self.r_motorFront.setQuadraturePosition(0, 0)
+##        self.l_motorFront.setQuadraturePosition(0, 0)
+##        self.r_motorFront.setQuadraturePosition(0, 0)
 
-##        self.l_chute.setQuadraturePosition(0, 0)
+          self.wrist.setQuadraturePosition(0, 0)
 ##        self.r_chute.setQuadraturePosition(0, 0)
-
+         
     def teleopPeriodic(self):
-        """This function is called periodically during operator control."""
-        self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
+##        self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
         #self.tankDrive = (self.xbox.getRawAxis(5) , self.xbox.getRawAxis(1))
 
-        #Right Joystick Intake for Loader and Chute(Ground Pickup 100%)
-##        if self.r_joy.getRawButton(1):
+#        Right Joystick Intake for Loader and Chute(Ground Pickup 100%)
+ #       if self.r_joy.getRawButton(1):
 ##            self.l_loader.set(1) 
 ##            self.l_chute.set(1)
 ##            self.r_loader.set(1)
 ##            self.r_chute.set(1)
-##        else:
+#            self.wrist.set(0.2)
+ #       else:
 ##            self.l_loader.set(0) 
 ##            self.l_chute.set(0)
 ##            self.r_loader.set(0)
 ##            self.r_chute.set(0)
-
+#            self.wrist.set(0)
         self.counter += 1
+        angle=self.wrist.getQuadraturePosition()
+        delta_angle=angle+102400
+           #check trasition between modes
+        if self.wrist_mode==0:
+           if self.r_joy.getRawButton(4):
+               self.wrist_mode=3
+        elif self.wrist_mode==1:
+           if self.r_joy.getRawButton(5):
+                self.wrist_mode=2
+        elif self.wrist_mode==2:
+           if angle<=-102400:
+                self.wrist_mode=0
+        else:
+           if angle>=0:
+              self.wrist_mode=1
+
+        #do mode
+        if self.wrist_mode==0:
+           self.wrist.set(0)
+        elif self.wrist_mode==1:
+           self.wrist.set(0)
+        elif self.wrist_mode==2:
+           if delta_angle>60000:
+             self.wrist.set(0.2)
+           else:
+             self.wrist.set(delta_angle/300000)#slow down as the angle gets close to quarter turn
+        else:
+            if angle<-60000:
+             self.wrist.set(-0.2)
+            else:
+             self.wrist.set(angle/300000)   #slow down as the angle gets close to quarter turn
+               
+       # if self.counter % 50 == 0#msg = 'Posistion of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
+           # self.logger.info(msg)
+
+           # msg = 'Velocity of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
+            #self.logger.info(msg)
 
         if self.counter % 50 == 0:
-            msg = 'Posistion of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
+            msg = 'Posistion {0} velocity {1} mode{2}'.format(self.wrist.getQuadraturePosition() , self.wrist.getQuadratureVelocity() , self.wrist_mode)
             self.logger.info(msg)
+            
 
-            msg = 'Velocity of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
-            self.logger.info(msg)
-
+          
 ##            msg = 'Posistion of Left & Right Chute Motors{0} {1}'.format(self.l_chute.getQuadraturePosition() , self.r_chute.getQuadraturePosition())
 ##            self.logger.info(msg)
 ##
