@@ -57,6 +57,9 @@ class MyRobot(wpilib.TimedRobot):
         self.wrist = ctre.wpi_talonsrx.WPI_TalonSRX(0)
         self.wrist.setInverted(False)
 
+        self.elbow = ctre.wpi_talonsrx.WPI_TalonSRX(0)
+        self.elbow.setInverted(False)
+
 ##        self.l_motorFront.configSelectedFeedbackSensor(ctre.wpi_talonsrx.WPI_TalonSRX.FeedbackDevice.QuadEncoder, 0, 0)
 ##        self.r_motorFront.configSelectedFeedbackSensor(ctre.wpi_talonsrx.WPI_TalonSRX.FeedbackDevice.QuadEncoder, 0, 0)
 
@@ -64,6 +67,7 @@ class MyRobot(wpilib.TimedRobot):
        # self.r_motorFront.setQuadraturePosition(0, 0)
         
         self.wrist.setQuadraturePosition(0, 0)
+        self.elbow.setQuadraturePosition(0, 0)
 
         #Here is the encoder setup for the left and right chute motors
 ##        self.l_chute = ctre.wpi_talonsrx.WPI_TalonSRX(5)
@@ -272,10 +276,10 @@ class MyRobot(wpilib.TimedRobot):
         delta_angle=angle+102400
            #check trasition between modes
         if self.wrist_mode==0:
-           if self.r_joy.getRawButton(4):
+           if self.r_joy.getRawButton(2):
                self.wrist_mode=3
         elif self.wrist_mode==1:
-           if self.r_joy.getRawButton(5):
+           if self.r_joy.getRawButton(3):
                 self.wrist_mode=2
         elif self.wrist_mode==2:
            if angle<=-102400:
@@ -299,7 +303,16 @@ class MyRobot(wpilib.TimedRobot):
              self.wrist.set(-0.2)
             else:
              self.wrist.set(angle/300000)   #slow down as the angle gets close to quarter turn
-               
+
+             
+        if self.elbow_mode==0:
+            if self.l_joy.getRawButton(2)
+                self.elbow_mode=3
+        elif self.elbow_mode==1:
+            if self.l_joy.getRawButton(3)
+                self.elbow_mode=2
+        elif self.elbow_mode==2:
+            if 
        # if self.counter % 50 == 0#msg = 'Posistion of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
            # self.logger.info(msg)
 
