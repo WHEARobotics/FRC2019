@@ -109,8 +109,11 @@ class MyRobot(wpilib.TimedRobot):
 ##        self.optical = wpilib.DigitalInput(4)      
         wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
-        
-        
+        #Angels 
+        self.elbow_angles = [0 , 50 , 90 , 150 , 180 , 200]
+        self.wrist_angles = [0 , 50 , 90 , 150 , 180 , 200]
+        self.target_arm_move = 0
+        self.previous_arm_move = 0
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -263,7 +266,13 @@ class MyRobot(wpilib.TimedRobot):
 ##
 ##            msg = 'Status of Optical Interrupter {0}'.format(self.optical.get())
 ##            self.logger.info(msg)
-##
+
+
+    def arm_move(self):
+        elbow_angles
+
+    def arm_checkstate(self):
+        pass
 
 
 if __name__ == "__main__":
