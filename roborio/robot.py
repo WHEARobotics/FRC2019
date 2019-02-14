@@ -251,6 +251,9 @@ class MyRobot(wpilib.TimedRobot):
         self.l_motorFront.setQuadraturePosition(0, 0)
         self.r_motorFront.setQuadraturePosition(0, 0)
 
+        self.elbow.setQuadraturePosition(0, 0)
+        self.wrist.setQuadraturePosition(0, 0)
+
 ##        self.l_chute.setQuadraturePosition(0, 0)
 ##        self.r_chute.setQuadraturePosition(0, 0)
 
@@ -261,15 +264,28 @@ class MyRobot(wpilib.TimedRobot):
 
         #Right Joystick Intake for Loader and Chute(Ground Pickup 100%)
         if self.r_joy.getRawButton(1):
-            self.elbow.set(0.2) 
+            self.wrist.set(0.2) 
 ##            self.l_chute.set(1)
 ##            self.r_loader.set(1)
 ##            self.r_chute.set(1)
         else:
-            self.elbow.set(0) 
+            self.wrist.set(0) 
 ##            self.l_chute.set(0)
 ##            self.r_loader.set(0)
 ##            self.r_chute.set(0)
+
+            
+        if self.l_joy.getRawButton(1):
+            self.wrist.set(0.2) 
+##            self.l_chute.set(1)
+##            self.r_loader.set(1)
+##            self.r_chute.set(1)
+        else:
+            self.wrist.set(0) 
+##            self.l_chute.set(0)
+##            self.r_loader.set(0)
+##            self.r_chute.set(0)
+
 
         self.counter += 1
 
