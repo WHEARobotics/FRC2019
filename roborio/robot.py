@@ -76,26 +76,26 @@ class MyRobot(wpilib.TimedRobot):
         self.wrist = ctre.wpi_talonsrx.WPI_TalonSRX(5)
         self.wrist.setInverted(False)
 
-        self.elbow.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
-        self.wrist.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
+        self.elbow.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Brake)
+        self.wrist.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Brake)
 
         self.elbow.setQuadraturePosition(0, 0)
         self.wrist.setQuadraturePosition(0, 0)
 
         
         #This is the setup for the gatherers
-        self.l_gatherer = ctre.victorspx.WPI_VictorSPX(6)
-        self.l_intake.setInverted(False)
+        self.l_gatherer = ctre.wpi_victorspx.WPI_VictorSPX(6)
+        self.l_gatherer.setInverted(False)
         
-        self.r_gatherer = ctre.victorspx.WPI_VictorSPX(7)
+        self.r_gatherer = ctre.wpi_victorspx.WPI_VictorSPX(7)
         self.r_gatherer.setInverted(False)
 
-        self.l_gatherer.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
-        self.r_gatherer.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
+        self.l_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
+        self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
 
         #Setup for pnumatics
         self.l_piston = wpilib.Solenoid(8 , 0)
-        self.r_piston = wpilib.Solenoid(9 , 1)
+        self.r_piston = wpilib.Solenoid(8 , 1)
 
         #Setup for drive groups and extras               
         self.l_joy = wpilib.Joystick(0)
@@ -134,8 +134,11 @@ class MyRobot(wpilib.TimedRobot):
         self.l_motorFront.setQuadraturePosition(0, 0)
         self.r_motorFront.setQuadraturePosition(0, 0)
 
-        self.l_intake.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
-        self.r_intake.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
+        self.elbow.setQuadraturePosition(0, 0)
+        self.wrist.setQuadraturePosition(0, 0)
+
+        self.l_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
+        self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
         
 
     def teleopPeriodic(self):
@@ -169,12 +172,12 @@ class MyRobot(wpilib.TimedRobot):
 
 
         #Piston Toggle Right Joystick
-        if self.r_joy.getRawButton(4):
-            self.l_piston.set(True)
-            self.r_piston.set(True)
-        else:
-            self.1_piston.set(False)
-            self.r_piston.set(False)
+##        if self.r_joy.getRawButton(4):
+##            self.l_piston.set(True)
+##            self.r_piston.set(True)
+##        else:
+##            self.l_piston.set(False)
+##            self.r_piston.set(False)
 
 
         #Cargo Ground Right Joystick
@@ -223,12 +226,12 @@ class MyRobot(wpilib.TimedRobot):
 
 
         #Piston Toggle Left Joystick
-        if self.l_joy.getRawButton(4):
-            self.l_piston.set(True)
-            self.r_piston.set(True)
-        else:
-            self.1_piston.set(False)
-            self.r_piston.set(False)
+##        if self.l_joy.getRawButton(4):
+##            self.l_piston.set(True)
+##            self.r_piston.set(True)
+##        else:
+##            self.l_piston.set(False)
+##            self.r_piston.set(False)
 
 
         #Multi-Low Left Joystick
@@ -249,21 +252,21 @@ class MyRobot(wpilib.TimedRobot):
         self.counter += 1
 
         if self.counter % 50 == 0:
-            msg = 'Posistion of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
+            msg = 'Posistion of Left & Right Drive Motors {0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
             self.logger.info(msg)
 
-            msg = 'Velocity of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
+            msg = 'Velocity of Left & Right Drive Motors {0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
             self.logger.info(msg)
 
-            msg = 'Posistion of Elbow & Wrist{0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
+            msg = 'Posistion of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
             self.logger.info(msg)
 
-            msg = 'Velocity of Elbow & Wrist{0} {1}'.format(self.elbow.getQuadratureVelocity() , self.wrist.getQuadratureVelocity())
+            msg = 'Velocity of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadratureVelocity() , self.wrist.getQuadratureVelocity())
             self.logger.info(msg)
-##
+
 ##            msg = 'Status of Optical Interrupter {0}'.format(self.optical.get())
 ##            self.logger.info(msg)
-##
+
 
 
 if __name__ == "__main__":
