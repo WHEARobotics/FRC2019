@@ -94,9 +94,8 @@ class MyRobot(wpilib.TimedRobot):
         self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
 
         #Setup for pnumatics
-        self.l_piston = wpilib.Solenoid(8 , 0)
-        self.r_piston = wpilib.Solenoid(8 , 1)
-
+        self.piston = wpilib.Solenoid(1 , 0)
+        
         #Setup for drive groups and extras               
         self.l_joy = wpilib.Joystick(0)
         self.r_joy = wpilib.Joystick(1)
@@ -173,11 +172,11 @@ class MyRobot(wpilib.TimedRobot):
 
         #Piston Toggle Right Joystick
 ##        if self.r_joy.getRawButton(4):
-##            self.l_piston.set(True)
-##            self.r_piston.set(True)
+##            self.piston.set(True)
+##            self.piston.set(True)
 ##        else:
-##            self.l_piston.set(False)
-##            self.r_piston.set(False)
+##            self.piston.set(False)
+##            self.piston.set(False)
 
 
         #Cargo Ground Right Joystick
@@ -227,11 +226,11 @@ class MyRobot(wpilib.TimedRobot):
 
         #Piston Toggle Left Joystick
 ##        if self.l_joy.getRawButton(4):
-##            self.l_piston.set(True)
-##            self.r_piston.set(True)
+##            self.piston.set(True)
+##            self.piston.set(True)
 ##        else:
-##            self.l_piston.set(False)
-##            self.r_piston.set(False)
+##            self.piston.set(False)
+##            self.piston.set(False)
 
 
         #Multi-Low Left Joystick
