@@ -273,6 +273,38 @@ class MyRobot(wpilib.TimedRobot):
 
     def arm_move(self):
         
+    def arm_check_state(self):
+        if self.r_joy.getRawButton(8):
+            self.target_arm_move = (3)
+            self.mode = 1
+
+        if self.target_arm_move = self.previous_arm_move:
+            self.mode = 2
+
+        if self.mode == 1:
+            if self.elbow.getQuadraturePosition() >= 0:
+                #stop
+            else:
+                #go
+
+            elif self.wrist.getQuadraturePosition() >= 0:
+                #stop
+            else:
+                #go
+
+        if self.mode == 2:
+            if self.elbow.getQuadraturePosition() >= 1:
+                #stop
+            else:
+                #go
+                
+            elif self.wrist.getQuadraturePosition() >= 1:
+                #stop
+            else:
+                #go
+            
+
+
 
 
 if __name__ == "__main__":
