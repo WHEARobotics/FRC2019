@@ -76,27 +76,26 @@ class MyRobot(wpilib.TimedRobot):
         self.wrist = ctre.wpi_talonsrx.WPI_TalonSRX(5)
         self.wrist.setInverted(False)
 
-        self.elbow.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
-        self.wrist.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
+        self.elbow.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Brake)
+        self.wrist.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Brake)
 
         self.elbow.setQuadraturePosition(0, 0)
         self.wrist.setQuadraturePosition(0, 0)
 
         
         #This is the setup for the gatherers
-##        self.l_gatherer = ctre.victorspx.WPI_VictorSPX(6)
-##        self.l_gatherer.setInverted(False)
-##        
-##        self.r_gatherer = ctre.victorspx.WPI_VictorSPX(7)
-##        self.r_gatherer.setInverted(False)
-##
-##        self.l_gatherer.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
-##        self.r_gatherer.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
+        self.l_gatherer = ctre.wpi_victorspx.WPI_VictorSPX(6)
+        self.l_gatherer.setInverted(False)
+        
+        self.r_gatherer = ctre.wpi_victorspx.WPI_VictorSPX(7)
+        self.r_gatherer.setInverted(False)
+
+        self.l_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
+        self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
 
         #Setup for pnumatics
-##        self.l_piston = wpilib.Solenoid(8 , 0)
-##        self.r_piston = wpilib.Solenoid(9 , 1)
-
+        self.piston = wpilib.Solenoid(1 , 0)
+        
         #Setup for drive groups and extras               
         self.l_joy = wpilib.Joystick(0)
         self.r_joy = wpilib.Joystick(1)
@@ -107,16 +106,13 @@ class MyRobot(wpilib.TimedRobot):
         self.counter = 0
         self.auto_loop_counter = 0
 ##        self.optical = wpilib.DigitalInput(4)      
-##        wpilib.CameraServer.launch()
+        wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
-        #Angles 
-        self.elbow_angles = [0 , 50 , 90 , 150 , 180 , 200]
-        self.wrist_angles = [0 , 50 , 90 , 150 , 180 , 200]
-##        self.target_arm_move = 0
-##        self.previous_arm_move = 0
-
-        self.previous_arm_move = self.wrist.getQuadraturePosition()
-        self.target_arm_move = self.wrist_angles
+        self.elbow_angles = [0 , 90 , 150 , 180 , 200]
+        self.wrist_angles = [0 , 90 , 150 , 180 , 200]
+        self.target_arm_move = 0
+        self.previous_arm_move = 0
+        self.mode = 0
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -143,8 +139,8 @@ class MyRobot(wpilib.TimedRobot):
         self.elbow.setQuadraturePosition(0, 0)
         self.wrist.setQuadraturePosition(0, 0)
 
-##        self.l_gatherer.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
-##        self.r_gatherer.setNeutralMode(ctre.ctre.victorspx.WPI_VictorSPX.NeutralMode.Coast)
+        self.l_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
+        self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
         
 
     def teleopPeriodic(self):
@@ -155,12 +151,12 @@ class MyRobot(wpilib.TimedRobot):
             #Right Joystick Buttons
         
         #L & R Gatherer Intake Right Joystick:
-##        if self.r_joy.getRawButton(1):
-##            self.l_gatherer.set(1) 
-##            self.r_gatherer.set(1)  
-##        else:
-##            self.l_gatherer.set(0) 
-##            self.r_gatherer.set(0)
+        if self.r_joy.getRawButton(1):
+            self.l_gatherer.set(1) 
+            self.r_gatherer.set(1)  
+        else:
+            self.l_gatherer.set(0) 
+            self.r_gatherer.set(0)
             
 
         #Wrist Down Right Joystick:
@@ -179,11 +175,11 @@ class MyRobot(wpilib.TimedRobot):
 
         #Piston Toggle Right Joystick
 ##        if self.r_joy.getRawButton(4):
-##            self.l_piston.set(True)
-##            self.r_piston.set(True)
+##            self.piston.set(True)
+##            self.piston.set(True)
 ##        else:
-##            self.l_piston.set(False)
-##            self.r_piston.set(False)
+##            self.piston.set(False)
+##            self.piston.set(False)
 
 
         #Cargo Ground Right Joystick
@@ -209,12 +205,12 @@ class MyRobot(wpilib.TimedRobot):
         #Left Joystick Buttons
         
         #L & R Gatherer Outtake Left Joystick:
-##        if self.l_joy.getRawButton(1):
-##            self.l_gatherer.set(-1) 
-##            self.r_gatherer.set(-1)  
-##        else:
-##            self.l_gatherer.set(0) 
-##            self.r_gatherer.set(0)
+        if self.l_joy.getRawButton(1):
+            self.l_gatherer.set(-1) 
+            self.r_gatherer.set(-1)  
+        else:
+            self.l_gatherer.set(0) 
+            self.r_gatherer.set(0)
             
 
         #Elbow Down Left Joystick:
@@ -233,11 +229,11 @@ class MyRobot(wpilib.TimedRobot):
 
         #Piston Toggle Left Joystick
 ##        if self.l_joy.getRawButton(4):
-##            self.l_piston.set(True)
-##            self.r_piston.set(True)
+##            self.piston.set(True)
+##            self.piston.set(True)
 ##        else:
-##            self.l_piston.set(False)
-##            self.r_piston.set(False)
+##            self.piston.set(False)
+##            self.piston.set(False)
 
 
         #Multi-Low Left Joystick
@@ -258,62 +254,56 @@ class MyRobot(wpilib.TimedRobot):
         self.counter += 1
 
         if self.counter % 50 == 0:
-##            msg = 'Posistion of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
-##            self.logger.info(msg)
-##
-##            msg = 'Velocity of Left & Right Drive Motors{0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
-##            self.logger.info(msg)
-
-            msg = 'Posistion of Elbow & Wrist{0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
+            msg = 'Posistion of Left & Right Drive Motors {0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
             self.logger.info(msg)
 
-##            msg = 'Velocity of Elbow & Wrist{0} {1}'.format(self.elbow.getQuadratureVelocity() , self.wrist.getQuadratureVelocity())
-##            self.logger.info(msg)
-##
+            msg = 'Velocity of Left & Right Drive Motors {0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
+            self.logger.info(msg)
+
+            msg = 'Posistion of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
+            self.logger.info(msg)
+
+            msg = 'Velocity of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadratureVelocity() , self.wrist.getQuadratureVelocity())
+            self.logger.info(msg)
+
 ##            msg = 'Status of Optical Interrupter {0}'.format(self.optical.get())
 ##            self.logger.info(msg)
 
-            msg = 'Posistion of Wrist {0}'.format(self.previous_arm_move)
-            self.logger.info(msg)
-
-        if self.target_arm_move[0] == self.previous_arm_move:
-            self.wrist.set(0)
-            self.elbow.set(0)
-            msg = 'yes'
-            self.logger.info(msg)
-        else:
-            msg = 'no'
-            self.logger.info(msg)
 
     def arm_move(self):
-        pass
-##        self.previous_arm_move = self.elbow.getQuadraturePosition()
-##        self.target_arm_move == self.elbow_angles
-
-##        msg = 'Posistion of Elbow {0}'.format(self.previous_arm_move)
-##        self.logger.info(msg)
+        
 
 
+    def arm_check_state(self):
+        if self.r_joy.getRawButton(8):
+            self.target_arm_move = (3)
+            self.mode = 1
 
-##        if self.previous_arm_move == 0:
-##            msg = 'yes'
-##            self.logger.info(msg)
-##        else:
-##            msg = 'no'
-##            self.logger.info(msg)
+        if self.target_arm_move = self.previous_arm_move:
+            self.mode = 2
 
-##        if self.l_joy.getRawButton(8):
-##            self.target_arm_move[0]
-##            if self.target_arm_move() == self.previous_arm_move():
-##                self.wrist.set(0)
-##                self.elbow.set(0)
-##                print ("good jobb")
-##            else:
-##                print ("no")
-         
+        if self.mode == 1:
+            if self.elbow.getQuadraturePosition() >= 0:
+                #stop
+            else:
+                #go
 
-    def arm_checkstate(self):
-        pass
+            elif self.wrist.getQuadraturePosition() >= 0:
+                #stop
+            else:
+                #go
+
+        if self.mode == 2:
+            if self.elbow.getQuadraturePosition() >= 1:
+                #stop
+            else:
+                #go
+                
+            elif self.wrist.getQuadraturePosition() >= 1:
+                #stop
+            else:
+                #go
+            
 
 
 if __name__ == "__main__":
