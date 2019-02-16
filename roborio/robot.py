@@ -94,7 +94,8 @@ class MyRobot(wpilib.TimedRobot):
         self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
 
         #Setup for pnumatics
-        self.piston = wpilib.Solenoid(1 , 0)
+        self.piston0 = wpilib.Solenoid(1 , 0)
+        self.piston1 = wpilib.Solenoid(1 , 1)
         
         #Setup for drive groups and extras               
         self.l_joy = wpilib.Joystick(0)
@@ -174,12 +175,12 @@ class MyRobot(wpilib.TimedRobot):
 
 
         #Piston Toggle Right Joystick
-##        if self.r_joy.getRawButton(4):
-##            self.piston.set(True)
-##            self.piston.set(True)
-##        else:
-##            self.piston.set(False)
-##            self.piston.set(False)
+        if self.r_joy.getRawButton(4):
+            self.piston0.set(True)
+            self.piston1.set(False)
+        else:
+            self.piston0.set(False)
+            self.piston1.set(True)
 
 
         #Cargo Ground Right Joystick
@@ -228,12 +229,12 @@ class MyRobot(wpilib.TimedRobot):
 
 
         #Piston Toggle Left Joystick
-##        if self.l_joy.getRawButton(4):
-##            self.piston.set(True)
-##            self.piston.set(True)
-##        else:
-##            self.piston.set(False)
-##            self.piston.set(False)
+        if self.l_joy.getRawButton(4):
+            self.piston0.set(True)
+            self.piston1.set(False)
+        else:
+            self.piston0.set(False)
+            self.piston1.set(True)
 
 
         #Multi-Low Left Joystick
@@ -272,38 +273,6 @@ class MyRobot(wpilib.TimedRobot):
 
     def arm_move(self):
         
-
-
-    def arm_check_state(self):
-        if self.r_joy.getRawButton(8):
-            self.target_arm_move = (3)
-            self.mode = 1
-
-        if self.target_arm_move = self.previous_arm_move:
-            self.mode = 2
-
-        if self.mode == 1:
-            if self.elbow.getQuadraturePosition() >= 0:
-                #stop
-            else:
-                #go
-
-            elif self.wrist.getQuadraturePosition() >= 0:
-                #stop
-            else:
-                #go
-
-        if self.mode == 2:
-            if self.elbow.getQuadraturePosition() >= 1:
-                #stop
-            else:
-                #go
-                
-            elif self.wrist.getQuadraturePosition() >= 1:
-                #stop
-            else:
-                #go
-            
 
 
 if __name__ == "__main__":
