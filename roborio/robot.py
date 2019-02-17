@@ -111,9 +111,10 @@ class MyRobot(wpilib.TimedRobot):
 ##        IP for camera server: http://10.38.81.2:1181/
         self.elbow_angles = [0 , 90 , 150 , 180 , 200]
         self.wrist_angles = [0 , 90 , 150 , 180 , 200]
-        self.target_arm_move = 0
-        self.previous_arm_move = 0
-        self.mode = 0
+        self.target_arm_position = 0
+        self.previous_arm_position = 0
+        self.wrist_state = 0
+        self.elbow_state = 0
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -272,36 +273,57 @@ class MyRobot(wpilib.TimedRobot):
 
 
     def arm_move(self):
+        self.wrist.getQuadraturePosition() = 0
+        self.elbow.getQuadraturePosition() = 0
+        # target_arm_angle - previous_arm_angle
+
+        if arm_state == 0:
+            pass
+
+        elif arm_state == 1:
+            if s
+
+        
+        
         
     def arm_check_state(self):
+        if self.target_arm_position = self.previous_arm_position:
+            self.wrist_state = 0
+
         if self.r_joy.getRawButton(8):
-            self.target_arm_move = (3)
-            self.mode = 1
+            self.target_arm_position = (3)
+            self.wrist_state = 1
+                                                #This "1" is a placeholder value for the maxium software limit position
+        if self.wrist.getQuadraturePosition() < 0:
+            self.wrist_state = 2
 
-        if self.target_arm_move = self.previous_arm_move:
-            self.mode = 2
+        if self.wrist.getQuadraturePosition() < 1:
+            self.wrist_state = 3
 
-        if self.mode == 1:
-            if self.elbow.getQuadraturePosition() >= 0:
-                #stop
-            else:
+
+
+        if self.wrist_state == 0:
+            #Do nothing
+                                                    #This "0" is a placeholder value for the software limit during arm movement
+        if self.wrist_state == 1:                    
+            if self.wrist.getQuadraturePosition() >= 0:
                 #go
+            
 
-            elif self.wrist.getQuadraturePosition() >= 0:
+        if self.wrist_state == 2:
+            if self.wrist.getQuadraturePosition() == 0:
                 #stop
-            else:
-                #go
-
-        if self.mode == 2:
-            if self.elbow.getQuadraturePosition() >= 1:
-                #stop
-            else:
-                #go
                 
-            elif self.wrist.getQuadraturePosition() >= 1:
-                #stop
-            else:
+            
+        if self.wrist_state == 3:
+            if self self.wrist.getQuadraturePosition() >= 1:
                 #go
+            
+
+        
+            
+                
+            
             
 
 
