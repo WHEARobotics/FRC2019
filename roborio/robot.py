@@ -302,8 +302,23 @@ class MyRobot(wpilib.TimedRobot):
                 #stop
             else:
                 #go
-            
 
+    def wrist_angle (self, counts):
+
+        angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
+
+        angle_end = 16/48 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
+        return angle_end
+        
+
+    def elbow_angle (self, counts):
+
+        angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
+
+        angle_end = 16/48 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
+        return angle_end   
+
+    
 
 
 
