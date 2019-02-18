@@ -152,14 +152,14 @@ class MyRobot(wpilib.TimedRobot):
         if self.l_joy.getRawButton(1) == self.r_joy.getRawButton(1):
             self.l_gatherer.set(0) 
             self.r_gatherer.set(0)
-            
+        #30% picks up quickly enough without damaging anything
         elif self.r_joy.getRawButton(1):
-            self.l_gatherer.set(1) 
-            self.r_gatherer.set(1)
-
+            self.l_gatherer.set(0.3) 
+            self.r_gatherer.set(0.3)
+        #50% shoots well but could work with less
         elif self.l_joy.getRawButton(1):
-            self.l_gatherer.set(-1) 
-            self.r_gatherer.set(-1)
+            self.l_gatherer.set(-0.5) 
+            self.r_gatherer.set(-0.5)
 
         else:
             self.l_gatherer.set(0) 
