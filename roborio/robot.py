@@ -273,23 +273,13 @@ class MyRobot(wpilib.TimedRobot):
 
 
     def arm_move(self):
-        self.wrist.getQuadraturePosition() = 0
-        self.elbow.getQuadraturePosition() = 0
-        # target_arm_angle - previous_arm_angle
+        wrist_angle = self.wrist.getQuadraturePosition()
+        elbow_angle = self.elbow.getQuadraturePosition()
 
-        if arm_state == 0:
-            pass
-
-        elif arm_state == 1:
-            if wrist_angle == self.target
-            #state = 2
-
-        elif arm_state == 2:
-            #test elbow angle
-            #state = 3
-
-        else:
-            #state == 3
+        self.delta_wrist_angle = self.wrist_angles[self.target_arm_position] - wrist_angle 
+        self.delta_elbow_angle = self.elbow_angles[self.target_arm_position] - elbow_angle
+        
+        
 
 
         if arm_state == 0:
@@ -302,61 +292,39 @@ class MyRobot(wpilib.TimedRobot):
 
         elif arm_state == 2:
             self.wrist.set(0)
-##            if elbow angle > 0:
-##                self.elbow.set(0.2
-##            else:
-##                self.elbow.set(-0.2)
+            if elbow_angle > 0:
+                self.elbow.set(0.2)
+            else:
+                self.elbow.set(-0.2)
         else:
             self.elbow.set(0)
-            self.wrist.set(0.2)
-                
-                               
-                               
-            
+            self.wrist.set(-0.2)
 
-        
-        
+
+
+##        if arm_state == 0:
+##            pass
+##
+##        elif arm_state == 1:
+##            if wrist_angle == self.wrist_angles[self.target_arm_position]:
+##                self.arm_state = 2
+##
+##        elif arm_state == 2:
+##            if elbow_angle == self.elbow_angles[self.target_arm_position]:
+##                self.arm_state = 3
+##
+##        else:
+##            if wrist_angle == self.wrist_angles[self.target_arm_position]:
+##                self.arm_state = 0
+##
+##            elif elbow_angle == self.elbow_angles[self.target_arm_position]:
+##                self.arm_state = 0
+                               
+                               
         
     def arm_check_state(self):
-        if self.target_arm_position = self.previous_arm_position:
-            self.wrist_state = 0
-
-        if self.r_joy.getRawButton(8):
-            self.target_arm_position = (3)
-            self.wrist_state = 1
-                                                #This "1" is a placeholder value for the maxium software limit position
-        if self.wrist.getQuadraturePosition() < 0:
-            self.wrist_state = 2
-
-        if self.wrist.getQuadraturePosition() < 1:
-            self.wrist_state = 3
-
-
-
-        if self.wrist_state == 0:
-            #Do nothing
-                                                    #This "0" is a placeholder value for the software limit during arm movement
-        if self.wrist_state == 1:                    
-            if self.wrist.getQuadraturePosition() >= 0:
-                #go
-            
-
-        if self.wrist_state == 2:
-            if self.wrist.getQuadraturePosition() == 0:
-                #stop
-                
-            
-        if self.wrist_state == 3:
-            if self self.wrist.getQuadraturePosition() >= 1:
-                #go
-            
-
-        
-            
-                
-            
-            
-
+        pass
+   
 
 
 
