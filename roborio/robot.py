@@ -165,6 +165,11 @@ class MyRobot(wpilib.TimedRobot):
             self.l_gatherer.set(0) 
             self.r_gatherer.set(0)
 
+        #Wrist Up Right Joystick:
+        if self.r_joy.getRawButton(3):
+            self.wrist.set(1) 
+        else:
+            self.wrist.set(0)
 
         #Piston Toggle Left or Right Joystick
         if self.l_joy.getRawButton(4) or self.r_joy.getRawButton(4):
