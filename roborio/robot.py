@@ -281,7 +281,38 @@ class MyRobot(wpilib.TimedRobot):
             pass
 
         elif arm_state == 1:
-            if s
+            if wrist_angle == self.target
+            #state = 2
+
+        elif arm_state == 2:
+            #test elbow angle
+            #state = 3
+
+        else:
+            #state == 3
+
+
+        if arm_state == 0:
+            self.wrist.set(0)
+            self.elbow.set(0)
+
+        elif arm_state == 1:
+            self.wrist.set(0.2)
+            self.elbow.set(0)
+
+        elif arm_state == 2:
+            self.wrist.set(0)
+##            if elbow angle > 0:
+##                self.elbow.set(0.2
+##            else:
+##                self.elbow.set(-0.2)
+        else:
+            self.elbow.set(0)
+            self.wrist.set(0.2)
+                
+                               
+                               
+            
 
         
         
