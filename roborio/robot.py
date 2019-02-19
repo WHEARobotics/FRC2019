@@ -279,7 +279,23 @@ class MyRobot(wpilib.TimedRobot):
         self.delta_wrist_angle = self.wrist_angles[self.target_arm_position] - wrist_angle 
         self.delta_elbow_angle = self.elbow_angles[self.target_arm_position] - elbow_angle
         
-        
+        if (self.wrist.getQuadraturePosition() > 0) or (self.elbow.getQuadraturePosition() > 0):
+            if self.delta_wrist_angle or self.delta_elbow_angle == 0:
+                state = 0
+
+        if self.wrist.getQuadraturePosition() > 0:
+            if self.delta_wrist_angle <= 0:
+                state = 2
+
+            else:
+                state = 1
+
+        if self.elbow.getQuadraturePosition() > 0:
+            if self.delta_elbow_angle <= 0:
+                state = 3
+
+            else:
+                state = 2
 
 
         if arm_state == 0:
