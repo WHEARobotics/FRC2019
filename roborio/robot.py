@@ -209,26 +209,6 @@ class MyRobot(wpilib.TimedRobot):
             self.wrist.set(0)
 
 
-        #Cargo Ground Right Joystick
-        if self.r_joy.getRawButton(6):
-            pass
-
-
-        #Cargo Rocket Low Right Joystick
-        if self.r_joy.getRawButton(7):
-            pass
-
-
-        #Cargo C.S. (Cargo Ship) Right Joystick
-        if self.r_joy.getRawButton(8):
-            pass
-
-
-        #Cargo Rocket Medium Right Joystick
-        if self.r_joy.getRawButton(9):
-            pass
-
-
         #Left Joystick Buttons
             
         #Elbow Down and Elbow up Left Joystick:
@@ -245,35 +225,50 @@ class MyRobot(wpilib.TimedRobot):
             self.elbow.set(0)
             
 
-        #Multi-Low Left Joystick
-        if self.r_joy.getRawButton(6):
-            pass
-
-
-        #Hatch Panel Rocket Medium Left Joystick
-        if self.r_joy.getRawButton(7):
-            pass
-
-
-        #Starting Concfiguration Left Joystick
-        if self.r_joy.getRawButton(8):
-            pass
-            
-
         self.counter += 1
 
         if self.counter % 50 == 0:
-            msg = 'Posistion Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
+            msg = 'Position Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
             self.logger.info(msg)
 
-            msg = 'Posistion of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
+            msg = 'Position of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
             self.logger.info(msg)
 
 ##            msg = 'Status of Optical Interrupter {0}'.format(self.optical.get())
 ##            self.logger.info(msg)
 
 
-    
+    #Set state based on button press
+    def check_buttons(self):
+        if self.l_joy.getRawButton(6): #Multi-Low Left Joystick
+            self.target_arm_position = 5
+            self.arm_state = 1
+
+        elif self.l_joy.getRawButton(7): #Hatch Panel Rocket Medium Left Joystick
+            self.target_arm_position = 3
+            self.arm_state = 1   
+            
+        elif self.l_joy.getRawButton(8): #Starting Concfiguration Left Joystick
+            self.target_arm_position = 0
+            self.arm_state = 1
+
+        elif self.r_joy.getRawButton(6): #Cargo Ground Right Joystick
+            self.target_arm_position = 6
+            self.arm_state = 1
+
+        elif self.r_joy.getRawButton(7): #Cargo Rocket Low Right Joystick
+            self.target_arm_position = 4
+            self.arm_state = 1
+
+        elif self.r_joy.getRawButton(8): #Cargo C.S. (Cargo Ship) Right Joystick
+            self.target_arm_position = 2
+            self.arm_state = 1
+
+        elif self.r_joy.getRawButton(9): #Cargo Rocket Medium Right Joystick
+            self.target_arm_position = 1
+            self.arm_state = 1
+
+            
     def arm_move(self):
         self.wrist_angle = convert_wrist_angle(self.wrist.getQuadraturePosition())
         self.elbow_angle = convert_elbow_angle(self.elbow.getQuadraturePosition())
@@ -281,7 +276,7 @@ class MyRobot(wpilib.TimedRobot):
         delta_wrist_angle = self.wrist_angles[self.target_arm_position] - self.wrist_angle 
         delta_elbow_angle = self.elbow_angles[self.target_arm_position] - self.elbow_angle
         
-        
+    #Check for state transitions
     if self.arm_state == 0:
         pass # A change out of state 0 only happens when a button is pressed, inside check_buttons().
 
@@ -307,6 +302,7 @@ class MyRobot(wpilib.TimedRobot):
             if self.delta_wrist_angle >= 0:
                 self.arm_state = 0 # The state 3 case.
 
+        #Move arm based on state 
         if self.arm_state == 0:
             self.wrist.set(0)
             self.elbow.set(0)
@@ -324,6 +320,24 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.elbow.set(0)
             self.wrist.set(-0.2)
+
+
+    #Converts encoder counts to angles
+    def convert_wrist_angle (self, counts):
+
+        angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
+
+        angle_end = 16/48 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
+        return angle_end
+        
+
+
+    def convert_elbow_angle (self, counts):
+
+        angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
+
+        angle_end = 16/48 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
+        return angle_end   
 
 
 
