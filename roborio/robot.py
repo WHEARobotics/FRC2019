@@ -299,44 +299,12 @@ class MyRobot(wpilib.TimedRobot):
         elif self.r_joy.getRawButton(6):
             self.target_arm_position = 1
             self.arm_state = 1
-
-
-
             
             
     def arm_move(self):
         
-    def arm_check_state(self):
-        if self.r_joy.getRawButton(8):
-            self.target_arm_move = (3)
-            self.mode = 1
 
-        if self.target_arm_move = self.previous_arm_move:
-            self.mode = 2
-
-        if self.mode == 1:
-            if self.elbow.getQuadraturePosition() >= 0:
-                #stop
-            else:
-                #go
-
-            elif self.wrist.getQuadraturePosition() >= 0:
-                #stop
-            else:
-                #go
-
-        if self.mode == 2:
-            if self.elbow.getQuadraturePosition() >= 1:
-                #stop
-            else:
-                #go
-                
-            elif self.wrist.getQuadraturePosition() >= 1:
-                #stop
-            else:
-                #go
-
-    def wrist_angle (self, counts):
+    def convert_wrist_angle (self, counts):
 
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
@@ -344,15 +312,12 @@ class MyRobot(wpilib.TimedRobot):
         return angle_end
         
 
-    def elbow_angle (self, counts):
+    def convert_elbow_angle (self, counts):
 
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
         angle_end = 16/48 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
         return angle_end   
-
-    
-
 
 
 if __name__ == "__main__":
