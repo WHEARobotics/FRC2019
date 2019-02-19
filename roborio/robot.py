@@ -272,32 +272,36 @@ class MyRobot(wpilib.TimedRobot):
 
     def check_buttons(self):
         if self.l_joy.getRawButton(8):
-            self.target_arm_position=0
-            self.arm_state = 1
-            
-        elif self.l_joy.getRawButton(6):
-            self.target_arm_position= 5
-            self.arm_state = 1
-            
-        elif self.r_joy.getRawButton(6):
-            self.target_arm_position=6
-            self.arm_state = 1
-
-        elif self.r_joy.getRawButton(7):
-            self.target_arm_position=4
-            self.arm_state = 1
-
-        elif self.r_joy.getRawButton(8):
-            self.target_arm_position=3
+            self.target_arm_position = 0
             self.arm_state = 1
 
         elif self.l_joy.getRawButton(7):
-            self.target_arm_position= 1
-            self.arm_state = 1
+            self.target_arm_position = 6
+            self.arm_state = 1   
 
         else self.r_joy.getRawButton(9):
-            self.target_arm_position=2
+            self.target_arm_position = 4
             self.arm_state = 1
+
+        elif self.r_joy.getRawButton(8):
+            self.target_arm_position = 3
+            self.arm_state = 1
+
+
+        elif self.r_joy.getRawButton(7):
+            self.target_arm_position = 2
+            self.arm_state = 1
+        
+        elif self.l_joy.getRawButton(6):
+            self.target_arm_position = 5
+            self.arm_state = 1
+            
+        elif self.r_joy.getRawButton(6):
+            self.target_arm_position = 1
+            self.arm_state = 1
+
+
+
             
             
     def arm_move(self):
