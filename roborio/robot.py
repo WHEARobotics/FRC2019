@@ -27,10 +27,10 @@ class MyRobot(wpilib.TimedRobot):
         4. Piston
 
             #Automated Buttons
-        6. Cargo Ground
-        7. Cargo Rocket Low
-        8. Cargo C.S. (Cargo Ship Chute)
-        9. Cargo Rocket Medium 
+        6. Cargo Ground [6]
+        7. Cargo Rocket Low [4]
+        8. Cargo C.S. (Cargo Ship Chute) [2]
+        9. Cargo Rocket Medium [1]
 
         (Hatch Panel) Outtake Left Joystick:
             #User Control Buttons
@@ -40,9 +40,9 @@ class MyRobot(wpilib.TimedRobot):
         4. Piston
 
             #Automated Buttons
-        6. Multi-Low (Rocket Hatch Port, Cargo Ship Hatch Port, Transfer Station)
-        7. Hatch Panel Rocket Medium 
-        8. Starting Configuration (For End Game Climb)
+        6. Multi-Low (Rocket Hatch Port, Cargo Ship Hatch Port, Transfer Station) [5]
+        7. Hatch Panel Rocket Medium [3]
+        8. Starting Configuration (For End Game Climb) [0]
         
         """
     
@@ -109,12 +109,21 @@ class MyRobot(wpilib.TimedRobot):
 ##        self.optical = wpilib.DigitalInput(4)      
         wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
-        self.elbow_angles = [0 , 90 , 150 , 180 , 200]
-        self.wrist_angles = [0 , 90 , 150 , 180 , 200]
+        
+##        [0] = Starting Config (8L)
+##        [1] = Cargo Rocket Med (9R)                              
+##        [2] = Cargo C.S. (8R)                            
+##        [3] = Hatch Panel Rocket Med (7L)                  
+##        [4] = Cargo Rocket Low (7R)              
+##        [5] = Multi-Low (6L)  
+##        [6] = Cargo Ground (6R) 
+        self.elbow_angles = [0 , 54.4 , 73 , 100.8 , 155.7 , 177.4 , 205]              
+        self.wrist_angles = [0 , -100 , -55.7 , -64.3 , -5.9 , 15.3 , -24]              
         self.target_arm_position = 0
         self.previous_arm_position = 0
         self.wrist_state = 0
         self.elbow_state = 0
+        self.arm_state = 0
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -272,41 +281,49 @@ class MyRobot(wpilib.TimedRobot):
 ##            self.logger.info(msg)
 
 
+    
     def arm_move(self):
-        wrist_angle = self.wrist.getQuadraturePosition()
-        elbow_angle = self.elbow.getQuadraturePosition()
+        self.wrist_angle = convert_wrist_angle(self.wrist.getQuadraturePosition())
+        self.elbow_angle = convert_elbow_angle(self.elbow.getQuadraturePosition())
 
-        self.delta_wrist_angle = self.wrist_angles[self.target_arm_position] - wrist_angle 
-        self.delta_elbow_angle = self.elbow_angles[self.target_arm_position] - elbow_angle
+        delta_wrist_angle = self.wrist_angles[self.target_arm_position] - self.wrist_angle 
+        delta_elbow_angle = self.elbow_angles[self.target_arm_position] - self.elbow_angle
         
-        if (self.wrist.getQuadraturePosition() > 0) or (self.elbow.getQuadraturePosition() > 0):
-            if self.delta_wrist_angle or self.delta_elbow_angle == 0:
-                state = 0
+        
+    if self.arm_state == 0:
+        pass # A change out of state 0 only happens when a button is pressed, inside check_buttons().
 
-        if self.wrist.getQuadraturePosition() > 0:
-            if self.delta_wrist_angle <= 0:
-                state = 2
+        elif self.arm_state == 1:
+            if self.delta_wrist_angle <= 0.0:
+                self.arm_state = 2 # To the next state.  Also, no need for an "else" because if the test is false, we just stay in state 1.
 
+        elif self.arm_state == 2:
+            if self.elbow.get() > 0.0:
+                if self.delta_elbow_angle <= 0.0:
+                    self.arm_state = 3  # Target angle reached, go to next state.
+
+        elif self.elbow.get() < 0.0: # Negative is counterclockwise.
+            if self.delta_elbow_angle <= 0.0:
+                self.arm_state = 3 
+       
             else:
-                state = 1
+                self.delta_elbow angle == 0.0:
+                    self.arm_state = 0 # Extraordinary case
+                
+    else:      
+        self.arm_state == 3:   # This is the 0.0 case, which would not expect in state 2, so panic and stop.
+            if self.delta_wrist_angle >= 0:
+                self.arm_state = 0 # The state 3 case.
 
-        if self.elbow.getQuadraturePosition() > 0:
-            if self.delta_elbow_angle <= 0:
-                state = 3
-
-            else:
-                state = 2
-
-
-        if arm_state == 0:
+        if self.arm_state == 0:
             self.wrist.set(0)
             self.elbow.set(0)
 
-        elif arm_state == 1:
+        elif self.arm_state == 1:
             self.wrist.set(0.2)
             self.elbow.set(0)
 
-        elif arm_state == 2:
+        elif self.arm_state == 2:
             self.wrist.set(0)
             if elbow_angle > 0:
                 self.elbow.set(0.2)
@@ -315,32 +332,6 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.elbow.set(0)
             self.wrist.set(-0.2)
-
-
-
-##        if arm_state == 0:
-##            pass
-##
-##        elif arm_state == 1:
-##            if wrist_angle == self.wrist_angles[self.target_arm_position]:
-##                self.arm_state = 2
-##
-##        elif arm_state == 2:
-##            if elbow_angle == self.elbow_angles[self.target_arm_position]:
-##                self.arm_state = 3
-##
-##        else:
-##            if wrist_angle == self.wrist_angles[self.target_arm_position]:
-##                self.arm_state = 0
-##
-##            elif elbow_angle == self.elbow_angles[self.target_arm_position]:
-##                self.arm_state = 0
-                               
-                               
-        
-    def arm_check_state(self):
-        pass
-   
 
 
 
