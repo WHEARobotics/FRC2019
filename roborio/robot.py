@@ -74,7 +74,7 @@ class MyRobot(wpilib.TimedRobot):
         self.elbow.setInverted(False)
         
         self.wrist = ctre.wpi_talonsrx.WPI_TalonSRX(5)
-        self.wrist.setInverted(False)
+        self.wrist.setInverted(True)
 
         self.elbow.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Brake)
         self.wrist.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Brake)
@@ -88,7 +88,7 @@ class MyRobot(wpilib.TimedRobot):
         self.l_gatherer.setInverted(False)
         
         self.r_gatherer = ctre.wpi_victorspx.WPI_VictorSPX(7)
-        self.r_gatherer.setInverted(False)
+        self.r_gatherer.setInverted(True)
 
         self.l_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
         self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
@@ -107,7 +107,7 @@ class MyRobot(wpilib.TimedRobot):
         self.counter = 0
         self.auto_loop_counter = 0
 ##        self.optical = wpilib.DigitalInput(4)      
-        wpilib.CameraServer.launch()
+##        wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
         
 ##        [0] = Starting Config (8L)
@@ -159,23 +159,24 @@ class MyRobot(wpilib.TimedRobot):
 
         self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
 
-            #Right Joystick Buttons
-        
-        #L & R Gatherer Intake Right Joystick:
-        if self.r_joy.getRawButton(1):
-            self.l_gatherer.set(1) 
-            self.r_gatherer.set(1)  
+            #Left and Right Joystick Buttons
+
+        #L & R Gatherer Intake/Outtake Right and Left Joystick:
+        if self.l_joy.getRawButton(1) == self.r_joy.getRawButton(1):
+            self.l_gatherer.set(0) 
+            self.r_gatherer.set(0)
+        #30% picks up quickly enough without damaging anything
+        elif self.r_joy.getRawButton(1):
+            self.l_gatherer.set(0.3) 
+            self.r_gatherer.set(0.3)
+        #50% shoots well but could work with less
+        elif self.l_joy.getRawButton(1):
+            self.l_gatherer.set(-0.5) 
+            self.r_gatherer.set(-0.5)
+
         else:
             self.l_gatherer.set(0) 
             self.r_gatherer.set(0)
-            
-
-        #Wrist Down Right Joystick:
-        if self.r_joy.getRawButton(2):
-            self.wrist.set(-1) 
-        else:
-            self.wrist.set(0)
-            
 
         #Wrist Up Right Joystick:
         if self.r_joy.getRawButton(3):
@@ -183,14 +184,29 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.wrist.set(0)
 
-
-        #Piston Toggle Right Joystick
-        if self.r_joy.getRawButton(4):
+        #Piston Toggle Left or Right Joystick
+        if self.l_joy.getRawButton(4) or self.r_joy.getRawButton(4):
             self.piston0.set(True)
             self.piston1.set(False)
         else:
             self.piston0.set(False)
             self.piston1.set(True)
+
+
+            #Right Joystick Buttons
+
+        #Wrist Down and Wrist up Right Joystick:
+        if self.r_joy.getRawButton(2) == self.r_joy.getRawButton(3):
+            self.wrist.set(0)
+
+        elif self.r_joy.getRawButton(2):
+            self.wrist.set(-1)
+            
+        elif self.r_joy.getRawButton(3):
+            self.wrist.set(1)
+
+        else:
+            self.wrist.set(0)
 
 
         #Cargo Ground Right Joystick
@@ -214,38 +230,20 @@ class MyRobot(wpilib.TimedRobot):
 
 
         #Left Joystick Buttons
-        
-        #L & R Gatherer Outtake Left Joystick:
-        if self.l_joy.getRawButton(1):
-            self.l_gatherer.set(-1) 
-            self.r_gatherer.set(-1)  
-        else:
-            self.l_gatherer.set(0) 
-            self.r_gatherer.set(0)
             
+        #Elbow Down and Elbow up Left Joystick:
+        if self.l_joy.getRawButton(2) == self.l_joy.getRawButton(3):
+            self.elbow.set(0)
 
-        #Elbow Down Left Joystick:
-        if self.l_joy.getRawButton(2):
-            self.wrist.set(-1) 
-        else:
-            self.wrist.set(0)
+        elif self.l_joy.getRawButton(2):
+            self.elbow.set(-1)
             
+        elif self.l_joy.getRawButton(3):
+            self.elbow.set(1)
 
-        #Elbow Up Left Joystick:
-        if self.r_joy.getRawButton(3):
-            self.wrist.set(1) 
         else:
-            self.wrist.set(0)
-
-
-        #Piston Toggle Left Joystick
-        if self.l_joy.getRawButton(4):
-            self.piston0.set(True)
-            self.piston1.set(False)
-        else:
-            self.piston0.set(False)
-            self.piston1.set(True)
-
+            self.elbow.set(0)
+            
 
         #Multi-Low Left Joystick
         if self.r_joy.getRawButton(6):
@@ -265,16 +263,10 @@ class MyRobot(wpilib.TimedRobot):
         self.counter += 1
 
         if self.counter % 50 == 0:
-            msg = 'Posistion of Left & Right Drive Motors {0} {1}'.format(self.l_motorFront.getQuadraturePosition() , self.r_motorFront.getQuadraturePosition())
-            self.logger.info(msg)
-
-            msg = 'Velocity of Left & Right Drive Motors {0} {1}'.format(self.l_motorFront.getQuadratureVelocity() , self.r_motorFront.getQuadratureVelocity())
+            msg = 'Posistion Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
             self.logger.info(msg)
 
             msg = 'Posistion of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
-            self.logger.info(msg)
-
-            msg = 'Velocity of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadratureVelocity() , self.wrist.getQuadratureVelocity())
             self.logger.info(msg)
 
 ##            msg = 'Status of Optical Interrupter {0}'.format(self.optical.get())
