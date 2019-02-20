@@ -107,7 +107,7 @@ class MyRobot(wpilib.TimedRobot):
         self.counter = 0
         self.auto_loop_counter = 0
 ##        self.optical = wpilib.DigitalInput(4)      
-##        wpilib.CameraServer.launch()
+        wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
         
 ##        [0] = Starting Config (8L)
@@ -169,10 +169,10 @@ class MyRobot(wpilib.TimedRobot):
         elif self.r_joy.getRawButton(1):
             self.l_gatherer.set(0.3) 
             self.r_gatherer.set(0.3)
-        #50% shoots well but could work with less
+        #75% shoots well but could work with less
         elif self.l_joy.getRawButton(1):
-            self.l_gatherer.set(-0.5) 
-            self.r_gatherer.set(-0.5)
+            self.l_gatherer.set(-0.75) 
+            self.r_gatherer.set(-0.75)
 
         else:
             self.l_gatherer.set(0) 
