@@ -178,11 +178,6 @@ class MyRobot(wpilib.TimedRobot):
             self.l_gatherer.set(0) 
             self.r_gatherer.set(0)
 
-        #Wrist Up Right Joystick:
-        if self.r_joy.getRawButton(3):
-            self.wrist.set(1) 
-        else:
-            self.wrist.set(0)
 
         #Piston Toggle Left or Right Joystick
         if self.l_joy.getRawButton(4) or self.r_joy.getRawButton(4):
@@ -200,10 +195,10 @@ class MyRobot(wpilib.TimedRobot):
             self.wrist.set(0)
 
         elif self.r_joy.getRawButton(2):
-            self.wrist.set(-1)
+            self.wrist.set(-0.2)
             
         elif self.r_joy.getRawButton(3):
-            self.wrist.set(1)
+            self.wrist.set(0.2)
 
         else:
             self.wrist.set(0)
@@ -236,10 +231,10 @@ class MyRobot(wpilib.TimedRobot):
             self.elbow.set(0)
 
         elif self.l_joy.getRawButton(2):
-            self.elbow.set(-1)
+            self.elbow.set(-0.2)
             
         elif self.l_joy.getRawButton(3):
-            self.elbow.set(1)
+            self.elbow.set(0.2)
 
         else:
             self.elbow.set(0)
