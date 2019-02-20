@@ -276,9 +276,9 @@ class MyRobot(wpilib.TimedRobot):
         delta_wrist_angle = self.wrist_angles[self.target_arm_position] - self.wrist_angle 
         delta_elbow_angle = self.elbow_angles[self.target_arm_position] - self.elbow_angle
         
-    #Check for state transitions
-    if self.arm_state == 0:
-        pass # A change out of state 0 only happens when a button is pressed, inside check_buttons().
+        #Check for state transitions
+        if self.arm_state == 0:
+            pass # A change out of state 0 only happens when a button is pressed, inside check_buttons().
 
         elif self.arm_state == 1:
             if self.delta_wrist_angle <= 0.0:
@@ -289,18 +289,18 @@ class MyRobot(wpilib.TimedRobot):
                 if self.delta_elbow_angle <= 0.0:
                     self.arm_state = 3  # Target angle reached, go to next state.
 
-        elif self.elbow.get() < 0.0: # Negative is counterclockwise.
-            if self.delta_elbow_angle <= 0.0:
-                self.arm_state = 3 
+            elif self.elbow.get() < 0.0: # Negative is counterclockwise.
+                if self.delta_elbow_angle >= 0.0:
+                    self.arm_state = 3 
        
             else:
-                self.delta_elbow angle == 0.0:
-                    self.arm_state = 0 # Extraordinary case
+                self.arm_state = 0 # Extraordinary case
                 
-    else:      
-        self.arm_state == 3:   # This is the 0.0 case, which would not expect in state 2, so panic and stop.
+        elif self.arm_state == 3:
             if self.delta_wrist_angle >= 0:
                 self.arm_state = 0 # The state 3 case.
+        else:
+            self.arm_state = 0 # In case arm_state ever is set outside the range 0..3, reset it to zero (stopped).
 
         #Move arm based on state 
         if self.arm_state == 0:
@@ -327,7 +327,7 @@ class MyRobot(wpilib.TimedRobot):
 
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
-        angle_end = 16/48 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
+        angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
         return angle_end
         
 
@@ -336,7 +336,7 @@ class MyRobot(wpilib.TimedRobot):
 
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
-        angle_end = 16/48 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
+        angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
         return angle_end   
 
 
