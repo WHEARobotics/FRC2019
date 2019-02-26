@@ -82,6 +82,15 @@ class MyRobot(wpilib.TimedRobot):
         self.elbow.setQuadraturePosition(0, 0)
         self.wrist.setQuadraturePosition(0, 0)
 
+        #Limit switch wrist and elbow
+
+        self.wrist.configForwardLimitSwitchSource(ctre.wpi_talonsrx.WPI_TalonSRX.LimitSwitchSource.FeedbackConnector, ctre.wpi_talonsrx.WPI_TalonSRX.LimitSwitchNormal.NormallyClosed)
+        self.wrist.configReverseLimitSwitchSource(ctre.wpi_talonsrx.WPI_TalonSRX.LimitSwitchSource.FeedbackConnector, ctre.wpi_talonsrx.WPI_TalonSRX.LimitSwitchNormal.NormallyClosed)
+
+        self.elbow.configForwardLimitSwitchSource(ctre.wpi_talonsrx.WPI_TalonSRX.LimitSwitchSource.FeedbackConnector, ctre.wpi_talonsrx.WPI_TalonSRX.LimitSwitchNormal.NormallyClosed)
+        
+        
+
         
         #This is the setup for the gatherers
         self.l_gatherer = ctre.wpi_victorspx.WPI_VictorSPX(6)
