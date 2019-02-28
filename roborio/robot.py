@@ -47,17 +47,17 @@ class MyRobot(wpilib.TimedRobot):
         """
     
         #Here is the encoder setup for the 4 motor drivetrain
-        self.l_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(0)
-        self.l_motorFront.setInverted(False)
-
-        self.l_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(1)
-        self.l_motorBack.setInverted(False)
-
-        self.r_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(2)
+        self.r_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(0)
         self.r_motorFront.setInverted(False)
-        
-        self.r_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(3)
+
+        self.r_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(1)
         self.r_motorBack.setInverted(False)
+
+        self.l_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(2)
+        self.l_motorFront.setInverted(False)
+        
+        self.l_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(3)
+        self.l_motorBack.setInverted(False)
 
         self.l_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
         self.l_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
