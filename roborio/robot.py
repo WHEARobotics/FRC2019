@@ -108,6 +108,12 @@ class MyRobot(wpilib.TimedRobot):
         self.auto_loop_counter = 0
 ##        self.optical = wpilib.DigitalInput(4)      
         wpilib.CameraServer.launch()
+        self.indecator_red = wpilib.Solenoid(1 , 2)
+        self.indecator_blue = wpilib.Solenoid(1 , 3)
+        self.indecator_yellow = wpilib.Solenoid(1 , 4)
+        self.sensor_right=wpilib.DigitalInput(0)
+        self.sensor_middle=wpilib.DigitalInput(1)
+        self.sensor_left=wpilib.DigitalInput(2)
 ##        IP for camera server: http://10.38.81.2:1181/
         
 ##        [0] = Starting Config (8L)
@@ -156,6 +162,8 @@ class MyRobot(wpilib.TimedRobot):
 
     def teleopPeriodic(self):
         """This function is called periodically during operator control."""
+
+        self.handlesensor()
 
         self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
 
@@ -264,8 +272,6 @@ class MyRobot(wpilib.TimedRobot):
             msg = 'Posistion of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
             self.logger.info(msg)
 
-##            msg = 'Status of Optical Interrupter {0}'.format(self.optical.get())
-##            self.logger.info(msg)
 
 
     
@@ -320,6 +326,26 @@ class MyRobot(wpilib.TimedRobot):
             self.elbow.set(0)
             self.wrist.set(-0.2)
 
+
+    def handlesensor(self):
+        if not self.sensor_middle.get():
+            self.indecator_blue.set(True)
+            
+        else:
+            self.indecator_blue.set(False)
+            
+        if not self.sensor_right.get():
+            self.indecator_red.set(True)
+            
+        else:
+            self.indecator_red.set(False)
+            
+        if not self.sensor_left.get():
+            self.indecator_yellow.set(True)
+           
+        else:
+            self.indecator_yellow.set(False)
+            
 
 
 if __name__ == "__main__":
