@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-    WHEA Robotics 3881 code for FRC 2018.
+    WHEA Robotics 3881 code for FRC 2019.
 """
 
 import wpilib
@@ -124,6 +124,8 @@ class MyRobot(wpilib.TimedRobot):
         self.wrist_state = 0
         self.elbow_state = 0
         self.arm_state = 0
+        self.tele_elbow_angles = [0 , 20 , 45 , 90 , 190]
+        self.tele_wrist_angles = [0 , 10 , 30 , 60 , 90]
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -223,6 +225,16 @@ class MyRobot(wpilib.TimedRobot):
 
         else:
             self.elbow.set(0)
+
+
+
+        if self.elbow_angle >= 20 and < 45:
+            if self.wrist_angle < 10:
+                self.wrist.set(1)
+            else:
+                self.wrist.set(0)
+
+        elif self.elbow_angle >=
             
 
         self.counter += 1
