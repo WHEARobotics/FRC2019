@@ -196,13 +196,11 @@ class MyRobot(wpilib.TimedRobot):
         if self.r_joy.getPOV() == self.r_joy.getPOV():
             self.wrist.set(0)
 
-        if self.r_joy.getPOV() == 180:
-            msg = 'wrist down'
-            self.logger.info(msg)
+        elif self.r_joy.getPOV() == 180:
+            self.wrist.set(-1)
             
         elif self.r_joy.getPOV() == 0:
-            msg = 'wrist up'
-            self.logger.info(msg)
+            self.wrist.set(1)
 
         else:
             self.wrist.set(0)
@@ -215,12 +213,10 @@ class MyRobot(wpilib.TimedRobot):
             self.elbow.set(0)
 
         elif self.l_joy.getPOV() == 180:
-            msg = 'wrist down {0}'.format(self.r_joy.getPOV())
-            self.logger.info(msg)
+            self.elbow.set(-1)
             
         elif self.l_joy.getPOV() == 0:
-            msg = 'wrist up {0}'.format(self.r_joy.getPOV())
-            self.logger.info(msg)
+            self.elbow.set(1)
 
         else:
             self.elbow.set(0)
