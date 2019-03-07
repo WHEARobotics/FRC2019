@@ -27,10 +27,10 @@ class MyRobot(wpilib.TimedRobot):
         POV 180: Wrist Down
 
             #Automated Buttons
-        5. Cargo Ground [6]
-        6. Cargo Rocket Low [4]
-        7. Cargo C.S. (Cargo Ship Chute) [2]
-        10. Cargo Rocket Medium [1]
+        11. Cargo Ground [6]
+        14. Cargo Rocket Low [4]
+        15. Cargo C.S. (Cargo Ship Chute) [2]
+        16. Cargo Rocket Medium [1]
 
         (Hatch Panel) Outtake Left Joystick:
             #User Control Buttons
@@ -40,9 +40,9 @@ class MyRobot(wpilib.TimedRobot):
         POV 180: Wrist Down
 
             #Automated Buttons
-        11. Multi-Low (Rocket Hatch Port, Cargo Ship Hatch Port, Transfer Station) [5]
-        12. Hatch Panel Rocket Medium [3]
-        13. Starting Configuration (For End Game Climb) [0]
+        14. Multi-Low (Rocket Hatch Port, Cargo Ship Hatch Port, Transfer Station) [5]
+        15. Hatch Panel Rocket Medium [3]
+        16. Starting Configuration (For End Game Climb) [0]
         
         """
     
@@ -107,7 +107,7 @@ class MyRobot(wpilib.TimedRobot):
         self.counter = 0
         self.auto_loop_counter = 0
 ##        self.optical = wpilib.DigitalInput(4)      
-##        wpilib.CameraServer.launch()
+        wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
         
 ##        [0] = Starting Config (8L)
@@ -247,31 +247,31 @@ class MyRobot(wpilib.TimedRobot):
 
     #Set state based on button press
     def check_buttons(self):
-        if self.l_joy.getRawButton(11): #Multi-Low Left Joystick
+        if self.l_joy.getRawButton(14): #Multi-Low Left Joystick
             self.target_arm_position = 5
             self.arm_state = 1
 
-        elif self.l_joy.getRawButton(12): #Hatch Panel Rocket Medium Left Joystick
+        elif self.l_joy.getRawButton(15): #Hatch Panel Rocket Medium Left Joystick
             self.target_arm_position = 3
             self.arm_state = 1   
             
-        elif self.l_joy.getRawButton(13): #Starting Concfiguration Left Joystick
+        elif self.l_joy.getRawButton(16): #Starting Concfiguration Left Joystick
             self.target_arm_position = 0
             self.arm_state = 1
 
-        elif self.r_joy.getRawButton(5): #Cargo Ground Right Joystick
+        elif self.r_joy.getRawButton(11): #Cargo Ground Right Joystick
             self.target_arm_position = 6
             self.arm_state = 1
 
-        elif self.r_joy.getRawButton(6): #Cargo Rocket Low Right Joystick
+        elif self.r_joy.getRawButton(14): #Cargo Rocket Low Right Joystick
             self.target_arm_position = 4
             self.arm_state = 1
 
-        elif self.r_joy.getRawButton(7): #Cargo C.S. (Cargo Ship) Right Joystick
+        elif self.r_joy.getRawButton(15): #Cargo C.S. (Cargo Ship) Right Joystick
             self.target_arm_position = 2
             self.arm_state = 1
 
-        elif self.r_joy.getRawButton(10): #Cargo Rocket Medium Right Joystick
+        elif self.r_joy.getRawButton(16): #Cargo Rocket Medium Right Joystick
             self.target_arm_position = 1
             self.arm_state = 1
 
