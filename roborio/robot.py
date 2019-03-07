@@ -106,15 +106,19 @@ class MyRobot(wpilib.TimedRobot):
         self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
         self.counter = 0
         self.auto_loop_counter = 0
-##        self.optical = wpilib.DigitalInput(4)      
         wpilib.CameraServer.launch()
+        #IP for camera server: http://10.38.81.2:1181/
+
+        #Setup optical sesnors
+##        red = right
+##        blue = middle
+##        yellow = left
         self.indecator_red = wpilib.Solenoid(1 , 2)
         self.indecator_blue = wpilib.Solenoid(1 , 3)
         self.indecator_yellow = wpilib.Solenoid(1 , 4)
-        self.sensor_right=wpilib.DigitalInput(0)
-        self.sensor_middle=wpilib.DigitalInput(1)
-        self.sensor_left=wpilib.DigitalInput(2)
-##        IP for camera server: http://10.38.81.2:1181/
+        self.sensor_right = wpilib.DigitalInput(0)
+        self.sensor_middle = wpilib.DigitalInput(1)
+        self.sensor_left = wpilib.DigitalInput(2)
         
 ##        [0] = Starting Config (8L)
 ##        [1] = Cargo Rocket Med (9R)                              
