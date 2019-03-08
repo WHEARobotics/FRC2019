@@ -106,17 +106,18 @@ class MyRobot(wpilib.TimedRobot):
         self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
         self.counter = 0
         self.auto_loop_counter = 0
-##        self.optical = wpilib.DigitalInput(4)      
         wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
-        
+
+        #Angle number for set position
 ##        [0] = Starting Config (8L)
 ##        [1] = Cargo Rocket Med (9R)                              
 ##        [2] = Cargo C.S. (8R)                            
 ##        [3] = Hatch Panel Rocket Med (7L)                  
 ##        [4] = Cargo Rocket Low (7R)              
 ##        [5] = Multi-Low (6L)  
-##        [6] = Cargo Ground (6R) 
+##        [6] = Cargo Ground (6R)
+        #Setup for arm positions/arm angles
         self.elbow_angles = [0 , 54.4 , 73 , 100.8 , 155.7 , 177.4 , 205]              
         self.wrist_angles = [0 , -100 , -55.7 , -64.3 , -5.9 , 15.3 , -24]              
         self.target_arm_position = 0
@@ -124,8 +125,20 @@ class MyRobot(wpilib.TimedRobot):
         self.wrist_state = 0
         self.elbow_state = 0
         self.arm_state = 0
-        self.tele_elbow_angles = [0 , 20 , 45 , 90 , 190]
-        self.tele_wrist_angles = [0 , 10 , 30 , 60 , 90]
+##        teleop elbow angles = [0 , 10 , 45 , 90 , 150]
+##        teleop wrist angles = [0 , 10 , 30 , 60 , 90]
+##        self.tele_state = 0
+
+        #Setup for optical sensors
+##        red = right
+##        blue = middle
+##        yellow = left
+        self.indecator_red = wpilib.Solenoid(1 , 2)
+        self.indecator_blue = wpilib.Solenoid(1 , 3)
+        self.indecator_yellow = wpilib.Solenoid(1 , 4)
+        self.sensor_right = wpilib.DigitalInput(0)
+        self.sensor_middle = wpilib.DigitalInput(1)
+        self.sensor_left = wpilib.DigitalInput(2)
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -160,6 +173,7 @@ class MyRobot(wpilib.TimedRobot):
         """This function is called periodically during operator control."""
 
         self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
+        self.handle_sensor()
 
             #Left and Right Joystick Buttons
 
@@ -222,16 +236,6 @@ class MyRobot(wpilib.TimedRobot):
             self.elbow.set(0)
 
 
-
-        if self.elbow_angle >= 20 and < 45:
-            if self.wrist_angle < 10:
-                self.wrist.set(1)
-            else:
-                self.wrist.set(0)
-
-        elif self.elbow_angle >=
-            
-
         self.counter += 1
 
         if self.counter % 50 == 0:
@@ -241,11 +245,8 @@ class MyRobot(wpilib.TimedRobot):
             msg = 'Position of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
             self.logger.info(msg)
 
-##            msg = 'Status of Optical Interrupter {0}'.format(self.optical.get())
-##            self.logger.info(msg)
 
-
-    #Set state based on button press
+    #Set target state based on button press
     def check_buttons(self):
         if self.l_joy.getRawButton(14): #Multi-Low Left Joystick
             self.target_arm_position = 5
@@ -275,7 +276,10 @@ class MyRobot(wpilib.TimedRobot):
             self.target_arm_position = 1
             self.arm_state = 1
 
-            
+        else:
+            self.arm_state = 0
+
+    #Set state and move arm based on delta arm angles        
     def arm_move(self):
         self.wrist_angle = convert_wrist_angle(self.wrist.getQuadraturePosition())
         self.elbow_angle = convert_elbow_angle(self.elbow.getQuadraturePosition())
@@ -338,13 +342,62 @@ class MyRobot(wpilib.TimedRobot):
         return angle_end
         
 
-
     def convert_elbow_angle (self, counts):
 
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
         angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
-        return angle_end   
+        return angle_end
+    
+
+    #Turns on lights based on corresponding sensor 
+    def handle_sensor(self):
+        if not self.sensor_middle.get():
+            self.indecator_blue.set(True)
+            
+        else:
+            self.indecator_blue.set(False)
+            
+        if not self.sensor_right.get():
+            self.indecator_red.set(True)
+            
+        else:
+            self.indecator_red.set(False)
+            
+        if not self.sensor_left.get():
+            self.indecator_yellow.set(True)
+           
+        else:
+            self.indecator_yellow.set(False)
+
+
+    #test 
+##     if self.tele_state == 0:
+##            pass
+##
+##        if self.tele_state == 1:
+##            self.arm_state = 0
+##
+##        if self.elbow_angle >= 10 and self.elbow_angle < 45:
+##            if self.wrist_angle < 30:
+##                self.tele_state = 1
+##                self.wrist.set(1)
+##                
+##            else:
+##                self.tele_state = 0
+##                self.wrist.set(0)
+##
+##        elif self.elbow_angle >= 90 and self.elbow_angle < 150:
+##            if self.wrist_angle > 0:
+##                self.tele_state = 1
+##                self.wrist.set(-1)
+##                
+##            else:
+##                self.tele_state = 0
+##                self.wrist.set(0)
+##
+##        else:
+##            self.tele_state = 0
 
 
 
