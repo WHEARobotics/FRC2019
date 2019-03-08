@@ -105,7 +105,6 @@ class MyRobot(wpilib.TimedRobot):
         self.right = wpilib.SpeedControllerGroup(self.r_motorFront, self.r_motorBack)
         self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
         self.counter = 0
-        self.auto_loop_counter = 0
         wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
 
@@ -121,13 +120,10 @@ class MyRobot(wpilib.TimedRobot):
         self.elbow_angles = [0 , 54.4 , 73 , 100.8 , 155.7 , 177.4 , 205]              
         self.wrist_angles = [0 , -100 , -55.7 , -64.3 , -5.9 , 15.3 , -24]              
         self.target_arm_position = 0
-        self.previous_arm_position = 0
-        self.wrist_state = 0
-        self.elbow_state = 0
         self.arm_state = 0
 ##        teleop elbow angles = [0 , 10 , 45 , 90 , 150]
 ##        teleop wrist angles = [0 , 10 , 30 , 60 , 90]
-##        self.tele_state = 0
+
 
         #Setup for optical sensors
 ##        red = right
@@ -174,6 +170,8 @@ class MyRobot(wpilib.TimedRobot):
 
         self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
         self.handle_sensor()
+        self.check_buttons()
+        self.arm_move()
 
             #Left and Right Joystick Buttons
 
@@ -207,10 +205,8 @@ class MyRobot(wpilib.TimedRobot):
             #Right Joystick Buttons
             
         #Wrist Down and Wrist up Right Joystick:
-        if self.r_joy.getPOV() == self.r_joy.getPOV():
-            self.wrist.set(0)
 
-        elif self.r_joy.getPOV() == 180:
+        if self.r_joy.getPOV() == 180:
             self.wrist.set(-1)
             
         elif self.r_joy.getPOV() == 0:
@@ -223,10 +219,8 @@ class MyRobot(wpilib.TimedRobot):
             #Left Joystick Buttons
             
         #Elbow Down and Elbow up Left Joystick:
-        if self.l_joy.getPOV() == self.l_joy.getPOV():
-            self.elbow.set(0)
 
-        elif self.l_joy.getPOV() == 180:
+        if self.l_joy.getPOV() == 180:
             self.elbow.set(-1)
             
         elif self.l_joy.getPOV() == 0:
@@ -249,40 +243,53 @@ class MyRobot(wpilib.TimedRobot):
     #Set target state based on button press
     def check_buttons(self):
         if self.l_joy.getRawButton(14): #Multi-Low Left Joystick
+            self.choose_state1_state4()
             self.target_arm_position = 5
-            self.arm_state = 1
+            
 
         elif self.l_joy.getRawButton(15): #Hatch Panel Rocket Medium Left Joystick
+            self.choose_state1_state4()
             self.target_arm_position = 3
-            self.arm_state = 1   
+            
             
         elif self.l_joy.getRawButton(16): #Starting Concfiguration Left Joystick
+            self.choose_state1_state4()
             self.target_arm_position = 0
-            self.arm_state = 1
+            
 
         elif self.r_joy.getRawButton(11): #Cargo Ground Right Joystick
+            self.choose_state1_state4()
             self.target_arm_position = 6
-            self.arm_state = 1
+            
 
         elif self.r_joy.getRawButton(14): #Cargo Rocket Low Right Joystick
+            self.choose_state1_state4()
             self.target_arm_position = 4
-            self.arm_state = 1
+            
 
         elif self.r_joy.getRawButton(15): #Cargo C.S. (Cargo Ship) Right Joystick
+            self.choose_state1_state4()
             self.target_arm_position = 2
-            self.arm_state = 1
+            
 
         elif self.r_joy.getRawButton(16): #Cargo Rocket Medium Right Joystick
+            self.choose_state1_state4()
             self.target_arm_position = 1
-            self.arm_state = 1
+            
+
+    def choose_state1_state4(self):
+        
+        if self.target_arm_position == 0:
+            self.arm_state = 4
 
         else:
-            self.arm_state = 0
+            self.arm_state = 1
+            
 
     #Set state and move arm based on delta arm angles        
     def arm_move(self):
-        self.wrist_angle = convert_wrist_angle(self.wrist.getQuadraturePosition())
-        self.elbow_angle = convert_elbow_angle(self.elbow.getQuadraturePosition())
+        self.wrist_angle = self.convert_wrist_angle(self.wrist.getQuadraturePosition())
+        self.elbow_angle = self.convert_elbow_angle(self.elbow.getQuadraturePosition())
 
         delta_wrist_angle = self.wrist_angles[self.target_arm_position] - self.wrist_angle 
         delta_elbow_angle = self.elbow_angles[self.target_arm_position] - self.elbow_angle
@@ -292,24 +299,29 @@ class MyRobot(wpilib.TimedRobot):
             pass # A change out of state 0 only happens when a button is pressed, inside check_buttons().
 
         elif self.arm_state == 1:
-            if self.delta_wrist_angle <= 0.0:
+            if self.wrist_angle <= 0.0:
                 self.arm_state = 2 # To the next state.  Also, no need for an "else" because if the test is false, we just stay in state 1.
 
         elif self.arm_state == 2:
             if self.elbow.get() > 0.0:
-                if self.delta_elbow_angle <= 0.0:
+                if delta_elbow_angle <= 0.0:
                     self.arm_state = 3  # Target angle reached, go to next state.
 
             elif self.elbow.get() < 0.0: # Negative is counterclockwise.
-                if self.delta_elbow_angle >= 0.0:
+                if delta_elbow_angle >= 0.0:
                     self.arm_state = 3 
        
             else:
                 self.arm_state = 0 # Extraordinary case
                 
         elif self.arm_state == 3:
-            if self.delta_wrist_angle >= 0:
+            if delta_wrist_angle >= 0:
                 self.arm_state = 0 # The state 3 case.
+
+        elif self.arm_state == 4:
+            if self.wrist_angle <= 0:
+                self.arm_state = 2
+            
         else:
             self.arm_state = 0 # In case arm_state ever is set outside the range 0..3, reset it to zero (stopped).
 
@@ -319,18 +331,30 @@ class MyRobot(wpilib.TimedRobot):
             self.elbow.set(0)
 
         elif self.arm_state == 1:
-            self.wrist.set(0.2)
+            self.wrist.set(1)
             self.elbow.set(0)
 
         elif self.arm_state == 2:
             self.wrist.set(0)
-            if elbow_angle > 0:
-                self.elbow.set(0.2)
+            if delta_elbow_angle > 0:
+                self.elbow.set(1)
             else:
-                self.elbow.set(-0.2)
-        else:
+                self.elbow.set(-1)
+
+        elif self.arm_state == 3:
             self.elbow.set(0)
-            self.wrist.set(-0.2)
+            self.wrist.set(-1)
+
+        else:
+            self.elbow.set(1)
+            if self.elbow_angle > 20 and self.elbow_angle <= 45:
+                self.wrist.set(1)
+                
+            elif (self.elbow_angle > 45 and self.elbow_angle <= 60) or self.wrist_angle > 30:
+                self.wrist.set(0)
+
+            elif self.elbow_angle > 60:
+                self.wrist.set(-1)
 
 
     #Converts encoder counts to angles
@@ -369,35 +393,6 @@ class MyRobot(wpilib.TimedRobot):
            
         else:
             self.indecator_yellow.set(False)
-
-
-    #test 
-##     if self.tele_state == 0:
-##            pass
-##
-##        if self.tele_state == 1:
-##            self.arm_state = 0
-##
-##        if self.elbow_angle >= 10 and self.elbow_angle < 45:
-##            if self.wrist_angle < 30:
-##                self.tele_state = 1
-##                self.wrist.set(1)
-##                
-##            else:
-##                self.tele_state = 0
-##                self.wrist.set(0)
-##
-##        elif self.elbow_angle >= 90 and self.elbow_angle < 150:
-##            if self.wrist_angle > 0:
-##                self.tele_state = 1
-##                self.wrist.set(-1)
-##                
-##            else:
-##                self.tele_state = 0
-##                self.wrist.set(0)
-##
-##        else:
-##            self.tele_state = 0
 
 
 
