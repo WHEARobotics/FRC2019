@@ -6,6 +6,8 @@
 import wpilib
 import ctre
 import wpilib.drive
+import math
+
 
 
 class MyRobot(wpilib.TimedRobot):
@@ -121,9 +123,9 @@ class MyRobot(wpilib.TimedRobot):
         self.wrist_angles = [0 , -100 , -55.7 , -64.3 , -5.9 , 15.3 , -24]              
         self.target_arm_position = 0
         self.arm_state = 0
+        self.arm_manual = True
 ##        teleop elbow angles = [0 , 10 , 45 , 90 , 150]
 ##        teleop wrist angles = [0 , 10 , 30 , 60 , 90]
-
 
         #Setup for optical sensors
 ##        red = right
@@ -135,6 +137,7 @@ class MyRobot(wpilib.TimedRobot):
         self.sensor_right = wpilib.DigitalInput(0)
         self.sensor_middle = wpilib.DigitalInput(1)
         self.sensor_left = wpilib.DigitalInput(2)
+        
 
     def autonomousInit(self):
         """This function is run once each time the robot enters autonomous mode."""
@@ -143,142 +146,91 @@ class MyRobot(wpilib.TimedRobot):
     
     def autonomousPeriodic(self):
         """This function is called periodically during autonomous."""
-        pass
+        self.teleop_control()
     
 
     def teleopInit(self):
         """This function is run once each time the robot enters teleoperated mode."""
-        
-        self.l_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
-        self.l_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
-
-        self.r_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
-        self.r_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
-
-        self.l_motorFront.setQuadraturePosition(0, 0)
-        self.r_motorFront.setQuadraturePosition(0, 0)
-
-        self.elbow.setQuadraturePosition(0, 0)
-        self.wrist.setQuadraturePosition(0, 0)
-
-        self.l_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
-        self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
+        pass
         
 
     def teleopPeriodic(self):
         """This function is called periodically during operator control."""
-
-        self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
-        self.handle_sensor()
-        self.check_buttons()
-        self.arm_move()
-
-            #Left and Right Joystick Buttons
-
-        #L & R Gatherer Intake/Outtake Right and Left Joystick:
-        if self.l_joy.getRawButton(1) == self.r_joy.getRawButton(1):
-            self.l_gatherer.set(0) 
-            self.r_gatherer.set(0)
-        #30% picks up quickly enough without damaging anything
-        elif self.r_joy.getRawButton(1):
-            self.l_gatherer.set(0.3) 
-            self.r_gatherer.set(0.3)
-        #50% shoots well but could work with less
-        elif self.l_joy.getRawButton(1):
-            self.l_gatherer.set(-0.5) 
-            self.r_gatherer.set(-0.5)
-
-        else:
-            self.l_gatherer.set(0) 
-            self.r_gatherer.set(0)
-
-
-        #Piston Toggle Left or Right Joystick
-        if self.l_joy.getRawButton(2) or self.r_joy.getRawButton(2):
-            self.piston0.set(True)
-            self.piston1.set(False)
-        else:
-            self.piston0.set(False)
-            self.piston1.set(True)
-
-
-            #Right Joystick Buttons
-            
-        #Wrist Down and Wrist up Right Joystick:
-
-        if self.r_joy.getPOV() == 180:
-            self.wrist.set(-1)
-            
-        elif self.r_joy.getPOV() == 0:
-            self.wrist.set(1)
-
-        else:
-            self.wrist.set(0)
-
-
-            #Left Joystick Buttons
-            
-        #Elbow Down and Elbow up Left Joystick:
-
-        if self.l_joy.getPOV() == 180:
-            self.elbow.set(-1)
-            
-        elif self.l_joy.getPOV() == 0:
-            self.elbow.set(1)
-
-        else:
-            self.elbow.set(0)
-
-
-        self.counter += 1
-
-        if self.counter % 50 == 0:
-            msg = 'Position Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
-            self.logger.info(msg)
-
-            msg = 'Position of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
-            self.logger.info(msg)
+        self.teleop_control()
 
 
     #Set target state based on button press
     def check_buttons(self):
         if self.l_joy.getRawButton(14): #Multi-Low Left Joystick
-            self.choose_state1_state4()
+            self.select_states()
+            self.arm_manual = False
             self.target_arm_position = 5
-            
 
         elif self.l_joy.getRawButton(15): #Hatch Panel Rocket Medium Left Joystick
-            self.choose_state1_state4()
+            self.select_states()
+            self.arm_manual = False
             self.target_arm_position = 3
             
-            
         elif self.l_joy.getRawButton(16): #Starting Concfiguration Left Joystick
-            self.choose_state1_state4()
+            self.select_states()
+            self.arm_manual = False
             self.target_arm_position = 0
-            
 
         elif self.r_joy.getRawButton(11): #Cargo Ground Right Joystick
-            self.choose_state1_state4()
+            self.select_states()
+            self.arm_manual = False
             self.target_arm_position = 6
-            
 
         elif self.r_joy.getRawButton(14): #Cargo Rocket Low Right Joystick
-            self.choose_state1_state4()
+            self.select_states()
+            self.arm_manual = False
             self.target_arm_position = 4
-            
 
         elif self.r_joy.getRawButton(15): #Cargo C.S. (Cargo Ship) Right Joystick
-            self.choose_state1_state4()
+            self.select_states()
+            self.arm_manual = False
             self.target_arm_position = 2
-            
 
         elif self.r_joy.getRawButton(16): #Cargo Rocket Medium Right Joystick
-            self.choose_state1_state4()
+            self.select_states()
+            self.arm_manual = False
             self.target_arm_position = 1
-            
 
-    def choose_state1_state4(self):
-        
+        elif self.l_joy.getRawButton(11) or self.l_joy.getRawButton(12) or self.l_joy.getRawButton(13) or self.r_joy.getRawButton(12) or self.r_joy.getRawButton(13):
+            self.select_states()
+            self.arm_manual = False
+            
+        #Wrist Down and Wrist up Right Joystick:
+
+        if self.r_joy.getPOV() == 180:
+            self.wrist.set(-1)
+            self.arm_manual = True
+            
+        elif self.r_joy.getPOV() == 0:
+            self.wrist.set(1)
+            self.arm_manual = True
+
+        else:
+            if self.arm_manual == True:
+                self.wrist.set(0)
+            
+        #Elbow Down and Elbow up Left Joystick:
+
+        if self.l_joy.getPOV() == 180:
+            self.elbow.set(-1)
+            self.arm_manual = True
+            
+        elif self.l_joy.getPOV() == 0:
+            self.elbow.set(1)
+            self.arm_manual = True
+
+        else:
+            if self.arm_manual == True:
+                self.elbow.set(0)
+            
+            
+    #Selects state 1 or 4 based on starting arm position
+    def select_states(self):
         if self.target_arm_position == 0:
             self.arm_state = 4
 
@@ -293,73 +245,74 @@ class MyRobot(wpilib.TimedRobot):
 
         delta_wrist_angle = self.wrist_angles[self.target_arm_position] - self.wrist_angle 
         delta_elbow_angle = self.elbow_angles[self.target_arm_position] - self.elbow_angle
-        
-        #Check for state transitions
-        if self.arm_state == 0:
-            pass # A change out of state 0 only happens when a button is pressed, inside check_buttons().
 
-        elif self.arm_state == 1:
-            if self.wrist_angle <= 0.0:
-                self.arm_state = 2 # To the next state.  Also, no need for an "else" because if the test is false, we just stay in state 1.
-
-        elif self.arm_state == 2:
-            if self.elbow.get() > 0.0:
-                if delta_elbow_angle <= 0.0:
-                    self.arm_state = 3  # Target angle reached, go to next state.
-
-            elif self.elbow.get() < 0.0: # Negative is counterclockwise.
-                if delta_elbow_angle >= 0.0:
-                    self.arm_state = 3 
-       
-            else:
-                self.arm_state = 0 # Extraordinary case
-                
-        elif self.arm_state == 3:
-            if delta_wrist_angle >= 0:
-                self.arm_state = 0 # The state 3 case.
-
-        elif self.arm_state == 4:
-            if self.wrist_angle <= 0:
-                self.arm_state = 2
+        if self.arm_manual == False:
             
-        else:
-            self.arm_state = 0 # In case arm_state ever is set outside the range 0..3, reset it to zero (stopped).
+            #Check for state transitions
+            if self.arm_state == 0:
+                pass # A change out of state 0 only happens when a button is pressed, inside check_buttons().
 
-        #Move arm based on state 
-        if self.arm_state == 0:
-            self.wrist.set(0)
-            self.elbow.set(0)
+            elif self.arm_state == 1:
+                if self.wrist_angle <= 0.0:
+                    self.arm_state = 2 # To the next state.  Also, no need for an "else" because if the test is false, we just stay in state 1.
 
-        elif self.arm_state == 1:
-            self.wrist.set(1)
-            self.elbow.set(0)
+            elif self.arm_state == 2:
+                if self.elbow.get() > 0.0:
+                    if delta_elbow_angle <= 0.0:
+                        self.arm_state = 3  # Target angle reached, go to next state.
 
-        elif self.arm_state == 2:
-            self.wrist.set(0)
-            if delta_elbow_angle > 0:
-                self.elbow.set(1)
-            else:
-                self.elbow.set(-1)
+                elif self.elbow.get() < 0.0: # Negative is counterclockwise.
+                    if delta_elbow_angle >= 0.0:
+                        self.arm_state = 3 
+           
+                else:
+                    self.arm_state = 0 # Extraordinary case
+                    
+            elif self.arm_state == 3:
+                if delta_wrist_angle >= 0:
+                    self.arm_state = 0 # The state 3 case.
 
-        elif self.arm_state == 3:
-            self.elbow.set(0)
-            self.wrist.set(-1)
-
-        else:
-            self.elbow.set(1)
-            if self.elbow_angle > 20 and self.elbow_angle <= 45:
-                self.wrist.set(1)
+            elif self.arm_state == 4:
+                if self.wrist_angle <= 0:
+                    self.arm_state = 2
                 
-            elif (self.elbow_angle > 45 and self.elbow_angle <= 60) or self.wrist_angle > 30:
-                self.wrist.set(0)
+            else:
+                self.arm_state = 0 # In case arm_state ever is set outside the range 0..3, reset it to zero (stopped).
 
-            elif self.elbow_angle > 60:
+            #Move arm based on state 
+            if self.arm_state == 0:
+                self.wrist.set(0)
+                self.elbow.set(0)
+
+            elif self.arm_state == 1:
+                self.wrist.set(1)
+                self.elbow.set(0)
+
+            elif self.arm_state == 2:
+                self.wrist.set(0)
+                if delta_elbow_angle > 0:
+                    self.elbow.set(1)
+                else:
+                    self.elbow.set(-1)
+
+            elif self.arm_state == 3:
+                self.elbow.set(0)
                 self.wrist.set(-1)
+
+            else:
+                self.elbow.set(1)
+                if self.elbow_angle > 20 and self.elbow_angle <= 45:
+                    self.wrist.set(1)
+                    
+                elif (self.elbow_angle > 45 and self.elbow_angle <= 60) or self.wrist_angle > 30:
+                    self.wrist.set(0)
+
+                elif self.elbow_angle > 60:
+                    self.wrist.set(-1)
 
 
     #Converts encoder counts to angles
     def convert_wrist_angle (self, counts):
-
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
         angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
@@ -367,7 +320,6 @@ class MyRobot(wpilib.TimedRobot):
         
 
     def convert_elbow_angle (self, counts):
-
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
         angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
@@ -393,8 +345,66 @@ class MyRobot(wpilib.TimedRobot):
            
         else:
             self.indecator_yellow.set(False)
+            
 
+    #Copy of teleop code for autonomous 
+    def teleop_control(self):
+        self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
+        self.handle_sensor()
+        self.check_buttons()
+        self.arm_move()
 
+            #Left and Right Joystick Buttons
+
+        #L & R Gatherer Intake/Outtake Right and Left Joystick:
+        if self.l_joy.getRawButton(1) == self.r_joy.getRawButton(1):
+            self.l_gatherer.set(0) 
+            self.r_gatherer.set(0)
+            
+        #30% picks up quickly enough without damaging anything
+        elif self.r_joy.getRawButton(1):
+            self.l_gatherer.set(0.3) 
+            self.r_gatherer.set(0.3)
+            
+        #50% shoots well but could work with less
+        elif self.l_joy.getRawButton(1):
+            self.l_gatherer.set(-0.5) 
+            self.r_gatherer.set(-0.5)
+
+        else:
+            self.l_gatherer.set(0) 
+            self.r_gatherer.set(0)
+
+        #Piston Toggle Left or Right Joystick
+        if self.l_joy.getRawButton(2) or self.r_joy.getRawButton(2):
+            self.piston0.set(True)
+            self.piston1.set(False)
+        else:
+            self.piston0.set(False)
+            self.piston1.set(True)
+        
+
+        self.counter += 1
+
+        if self.counter % 50 == 0:
+            msg = 'Position Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
+            self.logger.info(msg)
+
+            msg = 'Position of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
+            self.logger.info(msg)
+        
+
+    def arm_limit_check(self):
+        int_elbow_angle = 0
+        int_wrist_angle = 0
+        arm_angle_from_vertical = self.elbow_angle - int_elbow_angle
+        delta_arm_angle = (delta_elbow_angle - delta_wrist_angle)
+
+        elbow_reach = L * math.sin(math.radians(arm_angle_from_vertical))
+         
+        
+        
+        
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)
