@@ -49,17 +49,17 @@ class MyRobot(wpilib.TimedRobot):
         """
     
         #Here is the encoder setup for the 4 motor drivetrain
-        self.l_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(0)
-        self.l_motorFront.setInverted(False)
+        self.r_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(0)
+        self.r_motorFront.setInverted(True)
 
-        self.l_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(1)
-        self.l_motorBack.setInverted(False)
+        self.r_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(1)
+        self.r_motorBack.setInverted(True)
 
-        self.r_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(2)
-        self.r_motorFront.setInverted(False)
+        self.l_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(2)
+        self.l_motorFront.setInverted(True)
         
-        self.r_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(3)
-        self.r_motorBack.setInverted(False)
+        self.l_motorBack = ctre.wpi_talonsrx.WPI_TalonSRX(3)
+        self.l_motorBack.setInverted(True)
 
         self.l_motorFront.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast) 
         self.l_motorBack.setNeutralMode(ctre.wpi_talonsrx.WPI_TalonSRX.NeutralMode.Coast)
@@ -73,7 +73,7 @@ class MyRobot(wpilib.TimedRobot):
     
         #Here is the encoder setup for the elbow and wrist joints
         self.elbow = ctre.wpi_talonsrx.WPI_TalonSRX(4)
-        self.elbow.setInverted(False)
+        self.elbow.setInverted(True)
         
         self.wrist = ctre.wpi_talonsrx.WPI_TalonSRX(5)
         self.wrist.setInverted(True)
@@ -109,6 +109,7 @@ class MyRobot(wpilib.TimedRobot):
         self.counter = 0
         wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
+        self.dashboard = wpilib.SmartDashboard()
 
         #Angle number for set position
 ##        [0] = Starting Config (8L)
@@ -132,8 +133,8 @@ class MyRobot(wpilib.TimedRobot):
 ##        blue = middle
 ##        yellow = left
         self.indecator_red = wpilib.Solenoid(1 , 2)
-        self.indecator_blue = wpilib.Solenoid(1 , 3)
-        self.indecator_yellow = wpilib.Solenoid(1 , 4)
+        self.indecator_blue = wpilib.Solenoid(1 , 4)
+        self.indecator_yellow = wpilib.Solenoid(1 , 3)
         self.sensor_right = wpilib.DigitalInput(0)
         self.sensor_middle = wpilib.DigitalInput(1)
         self.sensor_left = wpilib.DigitalInput(2)
@@ -203,11 +204,11 @@ class MyRobot(wpilib.TimedRobot):
         #Wrist Down and Wrist up Right Joystick:
 
         if self.r_joy.getPOV() == 180:
-            self.wrist.set(-1)
+            self.wrist.set(-0.2)
             self.arm_manual = True
             
         elif self.r_joy.getPOV() == 0:
-            self.wrist.set(1)
+            self.wrist.set(0.2)
             self.arm_manual = True
 
         else:
@@ -217,11 +218,11 @@ class MyRobot(wpilib.TimedRobot):
         #Elbow Down and Elbow up Left Joystick:
 
         if self.l_joy.getPOV() == 180:
-            self.elbow.set(-1)
+            self.elbow.set(-0.2)
             self.arm_manual = True
             
         elif self.l_joy.getPOV() == 0:
-            self.elbow.set(1)
+            self.elbow.set(0.2)
             self.arm_manual = True
 
         else:
@@ -240,9 +241,6 @@ class MyRobot(wpilib.TimedRobot):
 
     #Set state and move arm based on delta arm angles        
     def arm_move(self):
-        self.wrist_angle = self.convert_wrist_angle(self.wrist.getQuadraturePosition())
-        self.elbow_angle = self.convert_elbow_angle(self.elbow.getQuadraturePosition())
-
         delta_wrist_angle = self.wrist_angles[self.target_arm_position] - self.wrist_angle 
         delta_elbow_angle = self.elbow_angles[self.target_arm_position] - self.elbow_angle
 
@@ -310,49 +308,89 @@ class MyRobot(wpilib.TimedRobot):
                 elif self.elbow_angle > 60:
                     self.wrist.set(-1)
 
+                    
+    def arm_limit_check(self):
+        """
+        Function to calculate the maximum wrist angle to keep the end efffector within 30 inches of the frame.
+        Uses self.elbow_angle, the current angle of the arm, so make sure that you have measured it
+        before calling this function.
+        """
+        length_arm = 15  # Length of arm between pivot points of elbow and wrist.
+        length_chungus = 15 # Length of chungus from wrist pivot to far end.
+        int_elbow_angle = 0  # Initial (starting) angle between chungus and the arm.
+        int_wrist_angle = 0 # Initial angle of arm with respect to vertical.
+        arm_angle_from_vertical = self.elbow_angle - int_elbow_angle
+        #delta_arm_angle = (delta_elbow_angle - delta_wrist_angle)
+        d = 2.5 # distance of wrist pivot from robot frame.
+
+        elbow_reach = length_arm * math.sin(math.radians(arm_angle_from_vertical))  # Horizontal distance from elbow pivot to wrist pivot.
+         
+        wrist_max_angle = math.degrees(math.asin((30 + d - elbow_reach) / length_chungus)) + 180 - arm_angle_from_vertical - int_wrist_angle
+
+        return wrist_max_angle
+    
+
+##    def increment_angle(self):
+##        self.target_arm_angle = 0
+##        self.arm_limit_check()
+##
+##
+##        if target_arm_angle >= wrist_max_angle:
+            
+
 
     #Converts encoder counts to angles
-    def convert_wrist_angle (self, counts):
+    def convert_wrist_angle(self, counts):
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
         angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
         return angle_end
         
 
-    def convert_elbow_angle (self, counts):
+    def convert_elbow_angle(self, counts):
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
         angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
         return angle_end
-    
+
 
     #Turns on lights based on corresponding sensor 
     def handle_sensor(self):
         if not self.sensor_middle.get():
             self.indecator_blue.set(True)
+            self.dashboard.putBoolean("DB/LED 1" , True)
             
         else:
             self.indecator_blue.set(False)
+            self.dashboard.putBoolean("DB/LED 1" , False)
             
         if not self.sensor_right.get():
             self.indecator_red.set(True)
+            self.dashboard.putBoolean("DB/LED 2" , True)
             
         else:
             self.indecator_red.set(False)
+            self.dashboard.putBoolean("DB/LED 2" , False)
             
         if not self.sensor_left.get():
             self.indecator_yellow.set(True)
+            self.dashboard.putBoolean("DB/LED 0" , True)
            
         else:
             self.indecator_yellow.set(False)
+            self.dashboard.putBoolean("DB/LED 0" , False)
             
 
     #Copy of teleop code for autonomous 
     def teleop_control(self):
         self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
         self.handle_sensor()
+##        self.wrist_angle = self.convert_wrist_angle(self.wrist.getQuadraturePosition())
+##        self.elbow_angle = self.convert_elbow_angle(self.elbow.getQuadraturePosition())
+##        msg = 'Angles {0} {1}'.format(self.elbow_angle , self.wrist_angle)
+##        self.dashboard.putString("DB/String 5" , msg)
         self.check_buttons()
-        self.arm_move()
+##        self.arm_move()
 
             #Left and Right Joystick Buttons
 
@@ -384,25 +422,14 @@ class MyRobot(wpilib.TimedRobot):
             self.piston1.set(True)
         
 
-        self.counter += 1
-
-        if self.counter % 50 == 0:
-            msg = 'Position Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
-            self.logger.info(msg)
-
-            msg = 'Position of Elbow & Wrist {0} {1}'.format(self.elbow.getQuadraturePosition() , self.wrist.getQuadraturePosition())
-            self.logger.info(msg)
-        
-
-    def arm_limit_check(self):
-        int_elbow_angle = 0
-        int_wrist_angle = 0
-        arm_angle_from_vertical = self.elbow_angle - int_elbow_angle
-        delta_arm_angle = (delta_elbow_angle - delta_wrist_angle)
-
-        elbow_reach = L * math.sin(math.radians(arm_angle_from_vertical))
-         
-        
+##        self.counter += 1
+##
+##        if self.counter % 50 == 0:
+##            msg = 'Position Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
+##            self.logger.info(msg)
+##
+##            msg = 'Position of Elbow & Wrist {0} {1}'.format(self.elbow_angle , self.wrist_angle)
+##            self.logger.info(msg)
         
         
 
