@@ -123,8 +123,11 @@ class MyRobot(wpilib.TimedRobot):
         self.elbow_angles = [0 , 54.4 , 73 , 100.8 , 155.7 , 177.4 , 205]              
         self.wrist_angles = [0 , -100 , -55.7 , -64.3 , -5.9 , 15.3 , -24]              
         self.target_arm_position = 0
+        self.desired_wrist_angle = 0 #Wrist position control
         self.arm_state = 0
         self.arm_manual = True
+        self.int_elbow_angle = 0  # Initial (starting) angle between chungus and the arm.
+        self.int_wrist_angle = 0 # Initial angle of arm with respect to vertical.
 ##        teleop elbow angles = [0 , 10 , 45 , 90 , 150]
 ##        teleop wrist angles = [0 , 10 , 30 , 60 , 90]
 
@@ -204,30 +207,55 @@ class MyRobot(wpilib.TimedRobot):
         #Wrist Down and Wrist up Right Joystick:
 
         if self.r_joy.getPOV() == 180:
-            self.wrist.set(-0.2)
             self.arm_manual = True
+            self.wrist.set(-0.2)
             
         elif self.r_joy.getPOV() == 0:
-            self.wrist.set(0.2)
             self.arm_manual = True
+            self.wrist.set(0.2)
 
         else:
             if self.arm_manual == True:
                 self.wrist.set(0)
+                
+        #New stuff
+        max_angle = self.arm_limit_check()
+
+        if self.r_joy.getPOV() == 180:
+            self.arm_manual = True
+            self.desired_wrist_angle -= 10
+            
+        elif self.r_joy.getPOV() == 0:
+            self.arm_manual = True
+            self.desired_wrist_angle += 10
+
+        if self.desired_wrist_angle > max_angle:
+            self.desired_wrist_angle = max_angle
+
             
         #Elbow Down and Elbow up Left Joystick:
-
+                
+        #Arm angle is set to true because POV puts us in manual mode
+        #Manual control of the elbow using the POV control on joystick
         if self.l_joy.getPOV() == 180:
-            self.elbow.set(-0.2)
             self.arm_manual = True
-            
+            if self.arm_angle_from_vertical > 10: #Choose torque based on if we're fighting gravity
+                self.elbow.set(-1) #High torque for going against gravity
+
+            else:
+                self.elbow.set(-0.2) #Low torque for going with gravity
+                
         elif self.l_joy.getPOV() == 0:
-            self.elbow.set(0.2)
             self.arm_manual = True
+            if self.arm_angle_from_vertical < -10:
+                self.elbow.set(1)
+
+            else:
+                self.elbow.set(0.2)
 
         else:
             if self.arm_manual == True:
-                self.elbow.set(0)
+                self.elbow.set(0) #Using this check don't want to set elbow to zero during auto mode
             
             
     #Selects state 1 or 4 based on starting arm position
@@ -317,40 +345,28 @@ class MyRobot(wpilib.TimedRobot):
         """
         length_arm = 15  # Length of arm between pivot points of elbow and wrist.
         length_chungus = 15 # Length of chungus from wrist pivot to far end.
-        int_elbow_angle = 0  # Initial (starting) angle between chungus and the arm.
-        int_wrist_angle = 0 # Initial angle of arm with respect to vertical.
-        arm_angle_from_vertical = self.elbow_angle - int_elbow_angle
         #delta_arm_angle = (delta_elbow_angle - delta_wrist_angle)
         d = 2.5 # distance of wrist pivot from robot frame.
 
         elbow_reach = length_arm * math.sin(math.radians(arm_angle_from_vertical))  # Horizontal distance from elbow pivot to wrist pivot.
          
-        wrist_max_angle = math.degrees(math.asin((30 + d - elbow_reach) / length_chungus)) + 180 - arm_angle_from_vertical - int_wrist_angle
+        wrist_max_angle = math.degrees(math.asin((30 + d - elbow_reach) / length_chungus)) + 180 - self.arm_angle_from_vertical - self.int_wrist_angle
 
         return wrist_max_angle
     
-
-##    def increment_angle(self):
-##        self.target_arm_angle = 0
-##        self.arm_limit_check()
-##
-##
-##        if target_arm_angle >= wrist_max_angle:
-            
-
 
     #Converts encoder counts to angles
     def convert_wrist_angle(self, counts):
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
-        angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
+        angle_end = 16/48 * angle_shaft #The big sproket for the wrist has 48 teeth and the small one has 16
         return angle_end
         
 
     def convert_elbow_angle(self, counts):
         angle_shaft = counts/409600.0 * 360 #There are 409600 counts per revolution and 360 degrees in one rotation
 
-        angle_end = 16/48 * 16/66 * angle_shaft #The big sproket for the elbow has 48 teeth and the small one has 16
+        angle_end = 16/48 * angle_shaft /3.25 #The big sproket for the elbow has 48 teeth and the small one has 16
         return angle_end
 
 
@@ -358,36 +374,37 @@ class MyRobot(wpilib.TimedRobot):
     def handle_sensor(self):
         if not self.sensor_middle.get():
             self.indecator_blue.set(True)
-            self.dashboard.putBoolean("DB/LED 1" , True)
+##            self.dashboard.putBoolean("DB/LED 1" , True)
             
         else:
             self.indecator_blue.set(False)
-            self.dashboard.putBoolean("DB/LED 1" , False)
+##            self.dashboard.putBoolean("DB/LED 1" , False)
             
         if not self.sensor_right.get():
             self.indecator_red.set(True)
-            self.dashboard.putBoolean("DB/LED 2" , True)
+##            self.dashboard.putBoolean("DB/LED 2" , True)
             
         else:
             self.indecator_red.set(False)
-            self.dashboard.putBoolean("DB/LED 2" , False)
+##            self.dashboard.putBoolean("DB/LED 2" , False)
             
         if not self.sensor_left.get():
             self.indecator_yellow.set(True)
-            self.dashboard.putBoolean("DB/LED 0" , True)
+##            self.dashboard.putBoolean("DB/LED 0" , True)
            
         else:
             self.indecator_yellow.set(False)
-            self.dashboard.putBoolean("DB/LED 0" , False)
+##            self.dashboard.putBoolean("DB/LED 0" , False)
             
 
     #Copy of teleop code for autonomous 
     def teleop_control(self):
         self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
         self.handle_sensor()
-##        self.wrist_angle = self.convert_wrist_angle(self.wrist.getQuadraturePosition())
-##        self.elbow_angle = self.convert_elbow_angle(self.elbow.getQuadraturePosition())
-##        msg = 'Angles {0} {1}'.format(self.elbow_angle , self.wrist_angle)
+        self.wrist_angle = self.convert_wrist_angle(self.wrist.getQuadraturePosition())
+        self.elbow_angle = self.convert_elbow_angle(self.elbow.getQuadraturePosition())
+        self.arm_angle_from_vertical = self.elbow_angle - self.int_elbow_angle
+##        msg = 'Angles {0}'.format(self.elbow_angle)
 ##        self.dashboard.putString("DB/String 5" , msg)
         self.check_buttons()
 ##        self.arm_move()
@@ -428,7 +445,7 @@ class MyRobot(wpilib.TimedRobot):
 ##            msg = 'Position Right Drive Motor {0}'.format(self.r_motorFront.getQuadraturePosition())
 ##            self.logger.info(msg)
 ##
-##            msg = 'Position of Elbow & Wrist {0} {1}'.format(self.elbow_angle , self.wrist_angle)
+##            msg = 'Angle {0}'.format(self.elbow_angle)
 ##            self.logger.info(msg)
         
         
