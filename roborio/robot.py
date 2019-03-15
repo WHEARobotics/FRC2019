@@ -109,7 +109,7 @@ class MyRobot(wpilib.TimedRobot):
         self.counter = 0
         wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
-        self.dashboard = wpilib.SmartDashboard()
+##        self.dashboard = wpilib.SmartDashboard()
 
         #Angle number for set position
 ##        [0] = Starting Config (8L)
@@ -126,6 +126,9 @@ class MyRobot(wpilib.TimedRobot):
         self.desired_wrist_angle = 0 #Wrist position control
         self.arm_state = 0
         self.arm_manual = True
+        self.elbow_torque = 0
+        self.torque_setting = 0.025
+        self.elbow.set(0)
         self.int_elbow_angle = 0  # Initial (starting) angle between chungus and the arm.
         self.int_wrist_angle = 0 # Initial angle of arm with respect to vertical.
 ##        teleop elbow angles = [0 , 10 , 45 , 90 , 150]
@@ -217,45 +220,102 @@ class MyRobot(wpilib.TimedRobot):
         else:
             if self.arm_manual == True:
                 self.wrist.set(0)
-                
-        #New stuff
-        max_angle = self.arm_limit_check()
 
-        if self.r_joy.getPOV() == 180:
-            self.arm_manual = True
-            self.desired_wrist_angle -= 10
-            
-        elif self.r_joy.getPOV() == 0:
-            self.arm_manual = True
-            self.desired_wrist_angle += 10
-
-        if self.desired_wrist_angle > max_angle:
-            self.desired_wrist_angle = max_angle
-
-            
         #Elbow Down and Elbow up Left Joystick:
-                
-        #Arm angle is set to true because POV puts us in manual mode
-        #Manual control of the elbow using the POV control on joystick
+
+##        if self.l_joy.getPOV() == 180:
+##            self.arm_manual = True
+##            self.elbow.set(-0.5) 
+##                
+##        elif self.l_joy.getPOV() == 0:
+##            self.arm_manual = True
+##            self.elbow.set(0.5)
+##
+##        else:
+##            if self.arm_manual == True:
+##                self.elbow.set(0)
+
+
+        #Elbow torque setting
+
         if self.l_joy.getPOV() == 180:
             self.arm_manual = True
-            if self.arm_angle_from_vertical > 10: #Choose torque based on if we're fighting gravity
-                self.elbow.set(-1) #High torque for going against gravity
-
-            else:
-                self.elbow.set(-0.2) #Low torque for going with gravity
+            self.elbow_torque -= self.torque_setting
+            if self.elbow_torque < -1.0:
+                self.elbow_torque = -1.0
                 
         elif self.l_joy.getPOV() == 0:
             self.arm_manual = True
-            if self.arm_angle_from_vertical < -10:
-                self.elbow.set(1)
-
-            else:
-                self.elbow.set(0.2)
+            self.elbow_torque += self.torque_setting
+            if self.elbow_torque > 1.0:
+                self.elbow_torque = 1.0
 
         else:
             if self.arm_manual == True:
-                self.elbow.set(0) #Using this check don't want to set elbow to zero during auto mode
+                if self.elbow_torque > self.torque_setting:
+                    self.elbow_torque -= self.torque_setting
+                    
+                elif self.elbow_torque < -self.torque_setting:
+                    self.elbow_torque += self.torque_setting
+
+                else:
+                    self.elbow_torque = 0
+
+        self.elbow.set(self.elbow_torque)
+
+                
+        #New stuff
+##        max_angle = self.arm_limit_check()
+##
+##        if self.r_joy.getPOV() == 180:
+##            self.arm_manual = True
+##            self.desired_wrist_angle -= 10
+##            
+##        elif self.r_joy.getPOV() == 0:
+##            self.arm_manual = True
+##            self.desired_wrist_angle += 10
+##
+##        if self.desired_wrist_angle > max_angle:
+##            self.desired_wrist_angle = max_angle
+##
+##        arm_error = self.elbow_angle - self.desired_elbow_angle
+##        constant = 0
+##        wrist_torque = constant * elbow_error
+##
+##        if wrist_torque > 1.0:
+##            wrist_torque = 1.0
+##
+##        elif wrist_torque < - 1.0:
+##            wrist_torque = -1.0
+##
+##        self.wrist.set(wrist_torque)
+        
+        
+                
+        #Arm angle is set to true because POV puts us in manual mode
+        #Manual control of the elbow using the POV control on joystick
+##        if self.l_joy.getPOV() == 180:
+##            self.arm_manual = True
+##            if self.arm_angle_from_vertical > 10: #Choose torque based on if we're fighting gravity
+##                self.elbow.set(-1) #High torque for going against gravity
+##
+##            else:
+##                self.elbow.set(-0.2) #Low torque for going with gravity
+##                
+##        elif self.l_joy.getPOV() == 0:
+##            self.arm_manual = True
+##            if self.arm_angle_from_vertical < -10:
+##                self.elbow.set(1)
+##
+##            else:
+##                self.elbow.set(0.2)
+##
+##        else:
+##            if self.arm_manual == True:
+##                self.elbow.set(0) #Using this check don't want to set elbow to zero during auto mode
+
+
+    #
             
             
     #Selects state 1 or 4 based on starting arm position
@@ -401,9 +461,9 @@ class MyRobot(wpilib.TimedRobot):
     def teleop_control(self):
         self.drive.tankDrive(self.l_joy.getRawAxis(1) , self.r_joy.getRawAxis(1))
         self.handle_sensor()
-        self.wrist_angle = self.convert_wrist_angle(self.wrist.getQuadraturePosition())
-        self.elbow_angle = self.convert_elbow_angle(self.elbow.getQuadraturePosition())
-        self.arm_angle_from_vertical = self.elbow_angle - self.int_elbow_angle
+##        self.wrist_angle = self.convert_wrist_angle(self.wrist.getQuadraturePosition())
+##        self.elbow_angle = self.convert_elbow_angle(self.elbow.getQuadraturePosition())
+##        self.arm_angle_from_vertical = self.elbow_angle - self.int_elbow_angle
 ##        msg = 'Angles {0}'.format(self.elbow_angle)
 ##        self.dashboard.putString("DB/String 5" , msg)
         self.check_buttons()
