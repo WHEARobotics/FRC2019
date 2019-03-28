@@ -48,7 +48,7 @@ class MyRobot(wpilib.TimedRobot):
         
         """
     
-        #Here is the encoder setup for the 4 motor drivetrain
+        #Setup for the 4 motor drivetrain with encoders
         self.r_motorFront = ctre.wpi_talonsrx.WPI_TalonSRX(0)
         self.r_motorFront.setInverted(True)
 
@@ -70,8 +70,7 @@ class MyRobot(wpilib.TimedRobot):
         self.l_motorFront.setQuadraturePosition(0, 0)
         self.r_motorFront.setQuadraturePosition(0, 0)
 
-    
-        #Here is the encoder setup for the elbow and wrist joints
+        #Setup for the elbow and wrist joints with encoders
         self.elbow = ctre.wpi_talonsrx.WPI_TalonSRX(4)
         self.elbow.setInverted(True)
         
@@ -83,9 +82,8 @@ class MyRobot(wpilib.TimedRobot):
 
         self.elbow.setQuadraturePosition(0, 0)
         self.wrist.setQuadraturePosition(0, 0)
-
         
-        #This is the setup for the gatherers
+        #Setup for the gatherers
         self.l_gatherer = ctre.wpi_victorspx.WPI_VictorSPX(6)
         self.l_gatherer.setInverted(False)
         
@@ -95,17 +93,19 @@ class MyRobot(wpilib.TimedRobot):
         self.l_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
         self.r_gatherer.setNeutralMode(ctre.wpi_victorspx.WPI_VictorSPX.NeutralMode.Brake)
 
-        #Setup for pnumatics
+        #Setup for pneumatics
         self.piston0 = wpilib.Solenoid(1 , 0)
         self.piston1 = wpilib.Solenoid(1 , 1)
         
-        #Setup for drive groups and extras               
+        #Setup for drive groups and joysticks             
         self.l_joy = wpilib.Joystick(0)
         self.r_joy = wpilib.Joystick(1)
         
         self.left = wpilib.SpeedControllerGroup(self.l_motorFront, self.l_motorBack)
         self.right = wpilib.SpeedControllerGroup(self.r_motorFront, self.r_motorBack)
         self.drive = wpilib.drive.DifferentialDrive(self.left, self.right)
+
+        #Camera setup and extras
         self.counter = 0
         wpilib.CameraServer.launch()
 ##        IP for camera server: http://10.38.81.2:1181/
@@ -119,18 +119,21 @@ class MyRobot(wpilib.TimedRobot):
 ##        [4] = Cargo Rocket Low (7R)              
 ##        [5] = Multi-Low (6L)  
 ##        [6] = Cargo Ground (6R)
+        
         #Setup for arm positions/arm angles
         self.elbow_angles = [0 , 54.4 , 73 , 100.8 , 155.7 , 177.4 , 205]              
         self.wrist_angles = [0 , -100 , -55.7 , -64.3 , -5.9 , 15.3 , -24]              
         self.target_arm_position = 0
         self.desired_wrist_angle = 0 #Wrist position control
         self.arm_state = 0
-        self.arm_manual = True
+        self.arm_manual = True #For switching between manual and automated modes
         self.elbow_torque = 0
-        self.torque_setting = 0.025
+        self.torque_setting = 0.025 #Elbow torque control
         self.elbow.set(0)
         self.int_elbow_angle = 0  # Initial (starting) angle between chungus and the arm.
         self.int_wrist_angle = 0 # Initial angle of arm with respect to vertical.
+        
+        #List of possible preset angles
 ##        teleop elbow angles = [0 , 10 , 45 , 90 , 150]
 ##        teleop wrist angles = [0 , 10 , 30 , 60 , 90]
 
@@ -166,7 +169,7 @@ class MyRobot(wpilib.TimedRobot):
         self.teleop_control()
 
 
-    #Set target state based on button press
+    #Set target state and mode based on button press
     def check_buttons(self):
         if self.l_joy.getRawButton(14): #Multi-Low Left Joystick
             self.select_states()
@@ -223,24 +226,9 @@ class MyRobot(wpilib.TimedRobot):
 
         #Elbow Down and Elbow up Left Joystick:
 
-##        if self.l_joy.getPOV() == 180:
-##            self.arm_manual = True
-##            self.elbow.set(-0.5) 
-##                
-##        elif self.l_joy.getPOV() == 0:
-##            self.arm_manual = True
-##            self.elbow.set(0.5)
-##
-##        else:
-##            if self.arm_manual == True:
-##                self.elbow.set(0)
-
-
-        #Elbow torque setting
-
         if self.l_joy.getPOV() == 180:
             self.arm_manual = True
-            self.elbow_torque -= self.torque_setting
+            self.elbow_torque -= self.torque_setting #Changes elbow movement based on torque setting 
             if self.elbow_torque < -1.0:
                 self.elbow_torque = -1.0
                 
@@ -264,7 +252,7 @@ class MyRobot(wpilib.TimedRobot):
         self.elbow.set(self.elbow_torque)
 
                 
-        #New stuff
+        #Position control loop for wrist
 ##        max_angle = self.arm_limit_check()
 ##
 ##        if self.r_joy.getPOV() == 180:
@@ -289,33 +277,6 @@ class MyRobot(wpilib.TimedRobot):
 ##            wrist_torque = -1.0
 ##
 ##        self.wrist.set(wrist_torque)
-        
-        
-                
-        #Arm angle is set to true because POV puts us in manual mode
-        #Manual control of the elbow using the POV control on joystick
-##        if self.l_joy.getPOV() == 180:
-##            self.arm_manual = True
-##            if self.arm_angle_from_vertical > 10: #Choose torque based on if we're fighting gravity
-##                self.elbow.set(-1) #High torque for going against gravity
-##
-##            else:
-##                self.elbow.set(-0.2) #Low torque for going with gravity
-##                
-##        elif self.l_joy.getPOV() == 0:
-##            self.arm_manual = True
-##            if self.arm_angle_from_vertical < -10:
-##                self.elbow.set(1)
-##
-##            else:
-##                self.elbow.set(0.2)
-##
-##        else:
-##            if self.arm_manual == True:
-##                self.elbow.set(0) #Using this check don't want to set elbow to zero during auto mode
-
-
-    #
             
             
     #Selects state 1 or 4 based on starting arm position
@@ -430,7 +391,7 @@ class MyRobot(wpilib.TimedRobot):
         return angle_end
 
 
-    #Turns on lights based on corresponding sensor 
+    #Turns on indecator lights based on corresponding sensor 
     def handle_sensor(self):
         if not self.sensor_middle.get():
             self.indecator_blue.set(True)
@@ -476,12 +437,12 @@ class MyRobot(wpilib.TimedRobot):
             self.l_gatherer.set(0) 
             self.r_gatherer.set(0)
             
-        #30% picks up quickly enough without damaging anything
+        #30% picks up quickly enough without damaging anything (Intake)
         elif self.r_joy.getRawButton(1):
             self.l_gatherer.set(0.3) 
             self.r_gatherer.set(0.3)
             
-        #50% shoots well but could work with less
+        #50% shoots well but could work with less (Outtake)
         elif self.l_joy.getRawButton(1):
             self.l_gatherer.set(-0.5) 
             self.r_gatherer.set(-0.5)
@@ -498,7 +459,7 @@ class MyRobot(wpilib.TimedRobot):
             self.piston0.set(False)
             self.piston1.set(True)
         
-
+        #Console messages for arm/drivetrain encoders
 ##        self.counter += 1
 ##
 ##        if self.counter % 50 == 0:
