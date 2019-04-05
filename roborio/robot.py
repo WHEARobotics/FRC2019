@@ -107,8 +107,9 @@ class MyRobot(wpilib.TimedRobot):
 
         #Camera setup and extras
         self.counter = 0
-        wpilib.CameraServer.launch()
-##        IP for camera server: http://10.38.81.2:1181/
+        wpilib.CameraServer.launch('vision.py:main')
+##        IP for camera server1: http://10.38.81.101:1181/
+##        IP for camera server2: http://10.38.81.101:1182/
 ##        self.dashboard = wpilib.SmartDashboard()
 
         #Angle number for set position
